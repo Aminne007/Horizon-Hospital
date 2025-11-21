@@ -177,7 +177,7 @@ const HomePage = () => {
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <h2 className="text-2xl font-bold sm:text-3xl">{t("home.servicesTitle")}</h2>
         </div>
-        <div className="mt-8 grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
             <Link
               key={service.title}
@@ -205,7 +205,7 @@ const HomePage = () => {
               {t("common.nav.departments")}
             </Link>
           </div>
-          <div className="mt-6 grid grid-cols-1 gap-2 sm:grid-cols-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
             {featuredDepartments.map((dept) => (
               <Link
                 key={dept}
@@ -229,7 +229,7 @@ const HomePage = () => {
               {t("common.nav.doctors")}
             </Link>
           </div>
-          <div className="mt-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
             {doctors.map((doc) => (
               <div
                 key={doc.name}

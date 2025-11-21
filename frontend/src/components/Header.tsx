@@ -97,27 +97,28 @@ const Header = () => {
       </div>
 
       {open && (
-        <div className="absolute left-0 right-0 top-full border-t border-white/30 bg-white/70 backdrop-blur shadow-xl lg:hidden z-50">
-          <nav className="flex w-full flex-col gap-2 px-4 py-4">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                onClick={() => setOpen(false)}
-                className={({ isActive }) =>
-                  `rounded-xl px-4 py-3 text-base font-semibold border border-white/40 backdrop-blur transition duration-300 w-full text-left ${
-                    isActive
-                      ? "bg-white/80 text-slate-900 shadow-md ring-1 ring-white/50 scale-[1.02]"
-                      : "bg-white/20 text-slate-900 hover:bg-white/40"
-                  }`
-                }
-                aria-current={location.pathname === link.path ? "page" : undefined}
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </nav>
-        </div>
+       <div className="absolute left-0 right-0 top-full border-t border-slate-200 bg-white shadow-xl lg:hidden z-50">
+       <nav className="flex w-full flex-col gap-2 px-4 py-4">
+         {navLinks.map((link) => (
+           <NavLink
+             key={link.path}
+             to={link.path}
+             onClick={() => setOpen(false)}
+             className={({ isActive }) =>
+               `rounded-xl px-4 py-3 text-base font-semibold border border-slate-300 transition duration-300 w-full text-left ${
+                 isActive
+                   ? "bg-slate-100 text-slate-900 shadow-md ring-1 ring-slate-300 scale-[1.02]"
+                   : "bg-white text-slate-900 hover:bg-slate-100"
+               }`
+             }
+             aria-current={location.pathname === link.path ? "page" : undefined}
+           >
+             {link.label}
+           </NavLink>
+         ))}
+       </nav>
+     </div>
+     
       )}
     </header>
   );
