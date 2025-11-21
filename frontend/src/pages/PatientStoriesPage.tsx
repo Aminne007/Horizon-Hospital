@@ -1,10 +1,12 @@
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
+import useScrollReveal from "../hooks/useScrollReveal";
 
 const PatientStoriesPage = () => {
   const { t } = useTranslation();
   const testimonials = t("home.testimonials", { returnObjects: true }) as { quote: string; name: string }[];
   const [isAdding, setIsAdding] = useState(false);
+  useScrollReveal();
 
   return (
     <div className="bg-white text-slate-900">
@@ -25,7 +27,7 @@ const PatientStoriesPage = () => {
           {testimonials.map((story) => (
             <div
               key={story.name}
-              className="flex h-full flex-col gap-3 rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-lg hover:ring-slate-200"
+              className="flex h-full flex-col gap-3 rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift scroll-reveal"
             >
               <p className="text-lg text-slate-800">“{story.quote}”</p>
               <p className="text-sm font-semibold text-blue-900">{story.name}</p>
@@ -41,8 +43,8 @@ const PatientStoriesPage = () => {
       </div>
 
       {isAdding && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4">
-          <div className="w-full max-w-3xl rounded-3xl bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6">
+          <div className="mx-auto w-full max-w-full rounded-3xl bg-white p-6 shadow-2xl sm:max-w-3xl sm:p-8">
             <div>
               <p className="text-sm font-semibold text-blue-900">
                 We ask for basic visit details to guarantee 100% trusted reviews.
@@ -50,7 +52,7 @@ const PatientStoriesPage = () => {
               <h2 className="text-2xl font-bold text-slate-900">Share your experience</h2>
             </div>
 
-            <form className="mt-5 grid gap-4" onSubmit={(e) => e.preventDefault()}>
+            <form className="mt-5 grid gap-4 overflow-y-auto pr-1" style={{ maxHeight: "calc(90vh - 120px)" }} onSubmit={(e) => e.preventDefault()}>
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="flex flex-col gap-2 text-sm font-semibold text-slate-900">
                   Full name

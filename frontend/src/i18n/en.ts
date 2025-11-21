@@ -79,10 +79,7 @@ const en = {
       { quote: "Scheduling was quick, and the doctors were patient and clear.", name: "Jamal F." },
       { quote: "I felt listened to. Recovery was smooth thanks to their rehab team.", name: "Priya D." },
     ],
-    ctaBannerTitle: "Your health deserves premium care",
-    ctaBannerText: "Share your needs and we will arrange the best time and specialist.",
-    ctaBannerButton: "Plan My Visit",
-    whyTitle: "Why choose Horizon Care",
+
     whyPoints: [
       { title: "Advanced Technology", desc: "High-end imaging, ORs, and monitoring for safer care." },
       { title: "Expert Care", desc: "Board-certified teams that collaborate across specialties." },

@@ -7,7 +7,10 @@ const Header = () => {
   const [open, setOpen] = useState(false);
   const location = useLocation();
   const emergencyNumber = t("common.hotlineNumber");
-  const emergencyHref = useMemo(() => `tel:${emergencyNumber.replace(/\s+/g, "")}`, [emergencyNumber]);
+  const emergencyHref = useMemo(() => {
+    const digitsOnly = emergencyNumber.replace(/[^\d+]/g, "");
+    return `tel:${digitsOnly}`;
+  }, [emergencyNumber]);
 
   const navLinks = useMemo(
     () => [
@@ -23,8 +26,8 @@ const Header = () => {
 
   return (
     <header className="sticky top-0 z-50 border-b border-white/40 bg-white/60 backdrop-blur-xl shadow-md relative">
-      <div className="flex w-full items-center justify-between px-4 py-4">
-        <Link to="/" className="flex items-center gap-3" onClick={() => setOpen(false)}>
+      <div className="mx-auto flex w-full max-w-6xl lg:max-w-7xl items-center justify-between px-4 py-3 sm:py-4">
+        <Link to="/" className="flex items-center gap-2 sm:gap-3" onClick={() => setOpen(false)}>
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-900 to-blue-600 text-lg font-bold text-white shadow-lg ring-1 ring-white/40 backdrop-blur">
             HC
           </div>
@@ -37,18 +40,29 @@ const Header = () => {
         <div className="flex items-center gap-3">
           <a
             href={emergencyHref}
-            className="inline-flex items-center gap-2 rounded-full bg-red-600 px-3 py-2 text-sm font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-red-700 focus-visible:ring-4 focus-visible:ring-red-300/70"
+            className="inline-flex items-center gap-2 rounded-full bg-red-600 px-2.5 py-2 text-xs font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-red-700 focus-visible:ring-4 focus-visible:ring-red-300/70 sm:px-3 sm:text-sm"
+            aria-label={t("common.emergency", { defaultValue: "Emergency" })}
           >
-            <span className="text-xs uppercase tracking-wide">SOS</span>
-            <span>{t("common.emergency", { defaultValue: "Emergency" })}</span>
+            <span aria-hidden="true" className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15">
+              <svg viewBox="0 0 24 24" role="img" aria-hidden="true" className="h-4 w-4">
+                <path
+                  fill="currentColor"
+                  d="M6.6 4.2c.4-.4 1-.5 1.5-.3l2.7 1.2c.6.2.9.9.7 1.5l-.7 2.2a1.3 1.3 0 0 1-.6.8l-.8.4a10.4 10.4 0 0 0 4.6 4.6l.4-.8c.1-.3.4-.5.8-.6l2.2-.7c.6-.2 1.2.1 1.5.7l1.2 2.7c.3.5.1 1.1-.3 1.5l-1.3 1.3c-.4.4-1 .5-1.5.3C11.7 18.5 5.5 12.3 3.2 6c-.2-.5-.1-1.1.3-1.5z"
+                />
+              </svg>
+            </span>
+            <span className="hidden sm:inline">{t("common.emergency", { defaultValue: "Emergency" })}</span>
+            <span className="sm:hidden" aria-hidden="true">
+              {emergencyNumber}
+            </span>
           </a>
-          <div className="hidden items-center gap-2 lg:flex">
+          <div className="hidden items-center gap-2 xl:flex">
             {navLinks.map((link) => (
               <NavLink
                 key={link.path}
                 to={link.path}
                 className={({ isActive }) =>
-                  `rounded-full px-4 py-2 text-base font-semibold transition duration-300 backdrop-blur border border-white/40 ${
+                  `rounded-full px-3 py-2 text-sm font-semibold transition duration-300 backdrop-blur border border-white/40 xl:text-base xl:px-4 ${
                     isActive
                       ? "bg-white/70 text-slate-900 shadow-lg ring-1 ring-white/50 scale-[1.04]"
                       : "bg-white/10 text-slate-900 hover:bg-white/30 hover:shadow-md hover:-translate-y-0.5"
@@ -66,10 +80,18 @@ const Header = () => {
           <button
             type="button"
             onClick={() => setOpen((prev) => !prev)}
-            className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/40 px-3 py-2 text-slate-900 shadow-sm backdrop-blur lg:hidden"
+            className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/40 px-3 py-2 text-slate-900 shadow-sm backdrop-blur xl:hidden"
             aria-label="Menu"
+            aria-expanded={open}
           >
-            ☰
+            <span className="sr-only">{open ? "Close menu" : "Open menu"}</span>
+            <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5">
+              {open ? (
+                <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" d="M6 6l12 12M6 18L18 6" />
+              ) : (
+                <path stroke="currentColor" strokeWidth="2" strokeLinecap="round" d="M4 7h16M4 12h16M4 17h16" />
+              )}
+            </svg>
           </button>
         </div>
       </div>

@@ -1,4 +1,7 @@
 import { useTranslation } from "react-i18next";
+import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
+import { useDoctorSelection } from "../context/DoctorSelectionContext";
 
 const AppointmentsPage = () => {
   const { t } = useTranslation();
@@ -10,26 +13,39 @@ const AppointmentsPage = () => {
   }) as string[];
   const bloodTypes = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
   const genders = t("appointments.genders", { returnObjects: true, defaultValue: ["Female", "Male"] }) as string[];
+  const [searchParams] = useSearchParams();
+  const { selectedDoctor, setSelectedDoctor } = useDoctorSelection();
+  const [doctorValue, setDoctorValue] = useState(selectedDoctor);
+
+  useEffect(() => {
+    const docFromQuery = searchParams.get("doctor");
+    if (docFromQuery) {
+      setDoctorValue(docFromQuery);
+      setSelectedDoctor(docFromQuery);
+    } else {
+      setDoctorValue(selectedDoctor);
+    }
+  }, [searchParams, selectedDoctor, setSelectedDoctor]);
 
   return (
     <div className="appointments-shell bg-gradient-to-b from-blue-50 via-white to-blue-50 text-slate-900">
-      <div className="mx-auto max-w-6xl px-4 py-12 space-y-8">
-        <div className="rounded-3xl bg-white p-8 shadow-lg ring-1 ring-slate-100">
-          <h1 className="text-4xl font-bold text-slate-900">{t("appointments.title")}</h1>
-          <p className="mt-2 text-lg text-slate-700">{t("appointments.subtitle")}</p>
-          <p className="mt-1 text-base font-semibold text-slate-900">{t("appointments.helper")}</p>
+      <div className="w-full mx-auto max-w-4xl px-4 py-8 space-y-6 sm:px-6 sm:py-10">
+        <div className="rounded-3xl bg-white p-5 shadow-lg ring-1 ring-slate-100 sm:p-6">
+          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">{t("appointments.title")}</h1>
+          <p className="mt-2 text-base text-slate-700 sm:text-lg">{t("appointments.subtitle")}</p>
+          <p className="mt-1 text-sm font-semibold text-slate-900 sm:text-base">{t("appointments.helper")}</p>
         </div>
 
-        <form className="space-y-5 rounded-3xl bg-white p-8 shadow-lg ring-1 ring-slate-100" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-5 rounded-3xl bg-white p-4 shadow-lg ring-1 ring-slate-100 sm:p-6" onSubmit={(e) => e.preventDefault()}>
           <div className="grid gap-5 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.name")}
-              <input type="text" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" />
+              <input type="text" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base sm:text-lg" />
               <span className="text-sm text-red-700">{t("appointments.errors.required")}</span>
             </label>
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.fatherName", { defaultValue: "Father name" })}
-              <input type="text" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" />
+              <input type="text" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base sm:text-lg" />
               <span className="text-sm text-red-700">
                 {t("appointments.errors.fatherName", { defaultValue: "Please enter the father name" })}
               </span>
@@ -42,14 +58,14 @@ const AppointmentsPage = () => {
               <input
                 type="email"
                 required
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg"
+                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base sm:text-lg"
                 placeholder="you@example.com"
               />
               <span className="text-sm text-red-700">{t("appointments.errors.email")}</span>
             </label>
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.motherName", { defaultValue: "Mother name" })}
-              <input type="text" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" />
+              <input type="text" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base sm:text-lg" />
               <span className="text-sm text-red-700">
                 {t("appointments.errors.motherName", { defaultValue: "Please enter the mother name" })}
               </span>
@@ -59,7 +75,7 @@ const AppointmentsPage = () => {
           <div className="grid gap-5 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.phone")}
-              <div className="flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-3 py-3 text-lg">
+              <div className="flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-3 py-3 text-base sm:text-lg">
                 <span className="rounded-xl bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 select-none">+961</span>
                 <input
                   type="tel"
@@ -67,7 +83,7 @@ const AppointmentsPage = () => {
                   inputMode="numeric"
                   pattern="\\d{8}"
                   maxLength={8}
-                  className="w-full border-0 bg-transparent px-1 py-1 text-lg outline-none focus:outline-none"
+                  className="w-full border-0 bg-transparent px-1 py-1 text-base outline-none focus:outline-none sm:text-lg"
                   placeholder="12345678"
                   title="Enter 8 digits after +961"
                 />
@@ -76,7 +92,14 @@ const AppointmentsPage = () => {
             </label>
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.department")}
-              <select className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" required>
+              <select
+                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base sm:text-lg"
+                value={doctorValue}
+                onChange={(event) => {
+                  setDoctorValue(event.target.value);
+                  setSelectedDoctor(event.target.value);
+                }}
+              >
                 <option value="">{t("appointments.department")}</option>
                 {departmentOptions.map((dept) => (
                   <option key={dept}>{dept}</option>
@@ -182,7 +205,14 @@ const AppointmentsPage = () => {
           <div className="grid gap-5 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.doctor")}
-              <select className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg">
+              <select
+                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg"
+                value={doctorValue}
+                onChange={(event) => {
+                  setDoctorValue(event.target.value);
+                  setSelectedDoctor(event.target.value);
+                }}
+              >
                 <option value="">{t("appointments.doctor")}</option>
                 {doctorOptions.map((doc) => (
                   <option key={doc.name}>{doc.name}</option>

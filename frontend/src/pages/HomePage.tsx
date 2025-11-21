@@ -1,9 +1,12 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
+import useScrollReveal from "../hooks/useScrollReveal";
 import heroImageOne from "../assets/Hero-title.webp";
 import heroImageTwo from "../assets/Hero-title1.webp";
 import heroImageThree from "../assets/Hero-title2.webp";
+import DoctorProfileModal from "../components/DoctorProfileModal";
+import { useDoctorSelection } from "../context/DoctorSelectionContext";
 
 const HomePage = () => {
   const { t } = useTranslation();
@@ -14,7 +17,29 @@ const HomePage = () => {
   const stats = t("home.stats", { returnObjects: true }) as { label: string; value: string }[];
   const testimonials = t("home.testimonials", { returnObjects: true }) as { quote: string; name: string }[];
   const placeholders = t("common.placeholders", { returnObjects: true }) as Record<string, string>;
+  const prefersReducedMotion = useMemo(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return false;
+    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }, []);
   const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [activeDoctor, setActiveDoctor] = useState<null | typeof doctors[0]>(null);
+  const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
+  const navigate = useNavigate();
+  const { setSelectedDoctor } = useDoctorSelection();
+  const formattedDates = useMemo(
+    () =>
+      doctors.map((_, idx) =>
+        new Intl.DateTimeFormat("en-US", { month: "short", year: "numeric" }).format(
+          new Date(2024 + Math.floor(idx / 12), idx % 12, Math.min(28, idx + 5))
+        )
+      ),
+    [doctors]
+  );
+  const handleDoctorBook = (name: string) => {
+    setSelectedDoctor(name);
+    navigate(`/appointments?doctor=${encodeURIComponent(name)}`);
+    setIsDoctorModalOpen(false);
+  };
   const heroSlides = useMemo(
     () => [
       {
@@ -37,20 +62,23 @@ const HomePage = () => {
   );
   const [activeSlide, setActiveSlide] = useState(0);
   const quickStats = stats.slice(0, 3);
+  useScrollReveal();
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
     const id = setInterval(() => {
       setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
     }, 5000);
     return () => clearInterval(id);
-  }, [testimonials.length]);
+  }, [prefersReducedMotion, testimonials.length]);
 
   useEffect(() => {
+    if (prefersReducedMotion) return;
     const id = setInterval(() => {
       setActiveSlide((prev) => (prev + 1) % heroSlides.length);
     }, 6000);
     return () => clearInterval(id);
-  }, [heroSlides.length]);
+  }, [prefersReducedMotion, heroSlides.length]);
 
   return (
     <div className="bg-white text-slate-900">
@@ -85,7 +113,7 @@ const HomePage = () => {
 
         <div className="relative mx-auto flex min-h-[60vh] flex-col justify-center px-4 py-8 sm:py-10 md:max-w-5xl lg:max-w-6xl lg:py-14">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:gap-10">
-            <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 px-5 py-6 shadow-2xl backdrop-blur-2xl ring-1 ring-white/25 sm:px-7 sm:py-8 lg:px-10 lg:py-12">
+            <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 px-5 py-6 shadow-2xl backdrop-blur-2xl ring-1 ring-white/25 sm:px-7 sm:py-8 lg:px-10 lg:py-12 animate-soft-fade scroll-reveal">
               <div className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full bg-blue-400/25 blur-3xl" />
               <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-sky-300/20 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-16 right-10 h-32 w-32 rounded-full bg-cyan-400/15 blur-3xl" />
@@ -143,22 +171,22 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-12">
+      <section className="w-full px-4 py-10 sm:py-12">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-3xl font-bold">{t("home.servicesTitle")}</h2>
+          <h2 className="text-2xl font-bold sm:text-3xl">{t("home.servicesTitle")}</h2>
         </div>
         <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
             <Link
               key={service.title}
               to={`/services/${service.title.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/(^-|-$)/g, "")}`}
-              className="group rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 transition duration-200 hover:-translate-y-1 hover:shadow-lg hover:ring-slate-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
+              className="group rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
             >
               <div className="flex items-center gap-3">
-                <span className="text-2xl transition duration-200 group-hover:scale-110">{service.icon}</span>
-                <p className="text-xl font-semibold text-slate-900">{service.title}</p>
+                <span className="text-xl sm:text-2xl transition duration-200 group-hover:scale-110">{service.icon}</span>
+                <p className="text-lg font-semibold text-slate-900 sm:text-xl">{service.title}</p>
               </div>
-              <p className="mt-3 text-base text-slate-700">{service.desc}</p>
+              <p className="mt-3 text-base text-slate-700 sm:text-lg">{service.desc}</p>
               <div className="mt-4 rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-500 transition duration-200 group-hover:bg-slate-100">
                 {placeholders.serviceImage}
               </div>
@@ -167,11 +195,11 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="bg-slate-50 py-12">
-        <div className="mx-auto max-w-7xl px-2 sm:px-4">
+      <section className="bg-slate-50 py-10 sm:py-12">
+        <div className="w-full px-3 sm:px-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-3xl font-bold">{t("home.departmentsTitle")}</h2>
-            <Link to="/departments" className="text-lg font-semibold text-blue-900 underline">
+            <h2 className="text-2xl font-bold sm:text-3xl">{t("home.departmentsTitle")}</h2>
+            <Link to="/departments" className="text-base font-semibold text-blue-900 underline sm:text-lg">
               {t("common.nav.departments")}
             </Link>
           </div>
@@ -180,9 +208,9 @@ const HomePage = () => {
               <Link
                 key={dept}
                 to={`/departments/${dept.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/(^-|-$)/g, "")}`}
-                className="group rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 transition duration-200 hover:-translate-y-1 hover:shadow-md hover:ring-slate-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
+                className="group rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 hover-lift scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
               >
-                <p className="text-lg font-semibold text-slate-900 transition duration-200 group-hover:text-blue-900">{dept}</p>
+                <p className="text-base font-semibold text-slate-900 transition duration-200 group-hover:text-blue-900 sm:text-lg">{dept}</p>
                 <div className="mt-2 h-24 rounded-xl bg-slate-100 text-center text-sm text-slate-500 transition duration-200 group-hover:bg-slate-200">
                   {placeholders.departmentImage}
                 </div>
@@ -192,32 +220,43 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="hidden mx-auto max-w-7xl px-4 py-12 md:block">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-3xl font-bold">{t("home.doctorsTitle")}</h2>
-          <Link to="/doctors" className="text-lg font-semibold text-blue-900 underline">
-            {t("common.nav.doctors")}
-          </Link>
-        </div>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {doctors.map((doc) => (
-            <div key={doc.name} className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100">
-              <div className="h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
-                {placeholders.doctorImage}
-              </div>
-              <p className="mt-4 text-xl font-bold text-slate-900">{doc.name}</p>
-              <p className="text-base font-semibold text-blue-900">{doc.role}</p>
-              <p className="mt-2 text-base text-slate-700">{doc.note}</p>
-              <Link
-                to="/appointments"
-                className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-lg font-semibold text-white"
+        <section className="hidden w-full px-4 py-12 md:block">
+          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+            <h2 className="text-3xl font-bold">{t("home.doctorsTitle")}</h2>
+            <Link to="/doctors" className="text-lg font-semibold text-blue-900 underline">
+              {t("common.nav.doctors")}
+            </Link>
+          </div>
+          <div className="mt-8 grid gap-6 md:grid-cols-3">
+            {doctors.map((doc) => (
+              <div
+                key={doc.name}
+                className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift cursor-pointer"
+                onClick={() => {
+                  setActiveDoctor(doc);
+                  setIsDoctorModalOpen(true);
+                }}
               >
-                {t("common.bookNow")}
-              </Link>
-            </div>
-          ))}
-        </div>
-      </section>
+                <div className="h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
+                  {placeholders.doctorImage}
+                </div>
+                <p className="mt-4 text-xl font-bold text-slate-900">{doc.name}</p>
+                <p className="text-base font-semibold text-blue-900">{doc.role}</p>
+                <p className="mt-2 text-base text-slate-700">{doc.note}</p>
+                <button
+                  type="button"
+                  className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-lg font-semibold text-white"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDoctorBook(doc.name);
+                  }}
+                >
+                  {t("common.bookNow")}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
 
       <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-12 text-white">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 md:grid-cols-3">
@@ -244,20 +283,20 @@ const HomePage = () => {
         </div>
       </section>
 
-      <section className="bg-slate-100 py-12">
-        <div className="mx-auto flex max-w-7xl flex-col gap-4 px-4 md:flex-row md:items-center md:justify-between">
-          <div>
-            <h3 className="text-3xl font-bold text-slate-900">{t("home.ctaBannerTitle")}</h3>
-            <p className="text-lg text-slate-700">{t("home.ctaBannerText")}</p>
-          </div>
-          <Link
-            to="/appointments"
-            className="rounded-2xl bg-blue-900 px-6 py-3 text-lg font-semibold text-white shadow-lg"
-          >
-            {t("home.ctaBannerButton")}
-          </Link>
-        </div>
-      </section>
+      {activeDoctor && (
+        <DoctorProfileModal
+          doctor={activeDoctor}
+          isOpen={isDoctorModalOpen}
+          onClose={() => setIsDoctorModalOpen(false)}
+          onBook={handleDoctorBook}
+          achievements={t("doctorsPage.achievementsSample", { returnObjects: true }) as string[]}
+          education={t("doctorsPage.educationSample", { returnObjects: true }) as string[]}
+          experience={t("doctorsPage.experienceSample", { returnObjects: true }) as string[]}
+          specializations={t("doctorsPage.specializationsSample", { returnObjects: true }) as string[]}
+          updatedLabel={`Updated ${formattedDates[doctors.findIndex((doc) => doc.name === activeDoctor.name)] ?? formattedDates[0]}`}
+        />
+      )}
+
     </div>
   );
 };

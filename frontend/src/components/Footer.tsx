@@ -8,34 +8,29 @@ const Footer = () => {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="bg-slate-950 text-slate-100">
-      <div className="mx-auto max-w-6xl px-4 py-12 space-y-8">
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-lg font-bold text-slate-900 shadow-lg">
+    <footer className="bg-slate-950 text-slate-100 text-sm">
+      <div className="mx-auto flex w-full max-w-6xl lg:max-w-7xl flex-col gap-4 px-3 py-6 sm:px-4 sm:py-6">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex items-center gap-2">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-base font-bold text-slate-900 shadow-lg">
               HC
             </div>
             <div>
-              <p className="text-lg font-bold">{t("common.hospitalName")}</p>
-              <p className="text-sm text-slate-200">{t("common.hospitalTagline")}</p>
+              <p className="text-base font-bold">{t("common.hospitalName")}</p>
+              <p className="text-xs text-slate-200">{t("common.hospitalTagline")}</p>
             </div>
           </div>
-          <div className="flex flex-wrap gap-3 text-base">
-            <span className="rounded-full bg-blue-500 px-4 py-2 font-bold text-white shadow-sm">
-              {t("common.hotline")}: {t("common.hotlineNumber")}
-            </span>
-            <span className="rounded-full border border-white/20 px-4 py-2 text-white">24/7</span>
-          </div>
+          <div className="flex flex-wrap gap-2 text-sm" />
         </div>
 
-        <div className="grid gap-3 sm:grid-cols-3">
+        <div className="grid gap-2 sm:grid-cols-3">
           {filteredLinks.map((item) => {
             if (item === "Patient Stories") {
               return (
                 <Link
                   key={item}
                   to="/stories"
-                  className="rounded-xl bg-white/5 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/10"
+                  className="rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-white/10"
                 >
                   {item}
                 </Link>
@@ -46,22 +41,22 @@ const Footer = () => {
                 <Link
                   key={item}
                   to="/billing"
-                  className="rounded-xl bg-white/5 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-white/10"
+                  className="rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-white shadow-sm hover:bg-white/10"
                 >
                   {item}
                 </Link>
               );
             }
             return (
-              <span key={item} className="rounded-xl bg-white/5 px-3 py-2 text-sm font-semibold text-white shadow-sm">
+              <span key={item} className="rounded-xl bg-white/5 px-3 py-2 text-xs font-semibold text-white shadow-sm">
                 {item}
               </span>
             );
           })}
         </div>
 
-        <div className="border-t border-white/10 pt-4 text-sm text-slate-300">
-          © {year} {t("common.hospitalName")}
+        <div className="border-t border-white/10 pt-3 text-xs text-slate-300">
+          (c) {year} {t("common.hospitalName")}
         </div>
       </div>
     </footer>
