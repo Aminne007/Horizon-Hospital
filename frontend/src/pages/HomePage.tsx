@@ -13,7 +13,6 @@ const HomePage = () => {
   const doctors = t("home.doctors", { returnObjects: true }) as { name: string; role: string; note: string }[];
   const stats = t("home.stats", { returnObjects: true }) as { label: string; value: string }[];
   const testimonials = t("home.testimonials", { returnObjects: true }) as { quote: string; name: string }[];
-  const heroTiles = t("home.heroTiles", { returnObjects: true }) as { title: string; desc: string }[];
   const placeholders = t("common.placeholders", { returnObjects: true }) as Record<string, string>;
   const [activeTestimonial, setActiveTestimonial] = useState(0);
   const heroSlides = useMemo(

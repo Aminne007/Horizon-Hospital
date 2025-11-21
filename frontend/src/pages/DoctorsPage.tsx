@@ -18,7 +18,6 @@ const DoctorsPage = () => {
   const experience = t("doctorsPage.experienceSample", { returnObjects: true }) as string[];
   const specializations = t("doctorsPage.specializationsSample", { returnObjects: true }) as string[];
   const achievements = t("doctorsPage.achievementsSample", { returnObjects: true }) as string[];
-  const featuredDoc = useMemo(() => doctors[0], [doctors]);
   const [carouselIndex, setCarouselIndex] = useState(0);
   const formattedDates = useMemo(
     () =>
