@@ -36,20 +36,24 @@ const PatientStoriesPage = () => {
           ))}
         </div>
 
-        <div className="rounded-3xl bg-slate-50 px-6 py-6 shadow-sm ring-1 ring-slate-100">
-          <h2 className="text-2xl font-bold text-slate-900">{t("home.ctaBannerTitle")}</h2>
-          <p className="mt-2 text-base text-slate-700">{t("home.ctaBannerText")}</p>
-        </div>
       </div>
 
       {isAdding && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 px-4 py-6">
-          <div className="mx-auto w-full max-w-full rounded-3xl bg-white p-6 shadow-2xl sm:max-w-3xl sm:p-8">
+          <div
+            className="mx-auto w-full max-w-full rounded-3xl bg-white p-6 shadow-2xl sm:max-w-3xl sm:p-8"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="review-modal-title"
+            aria-describedby="review-modal-desc"
+          >
             <div>
-              <p className="text-sm font-semibold text-blue-900">
+              <p className="text-sm font-semibold text-blue-900" id="review-modal-desc">
                 We ask for basic visit details to guarantee 100% trusted reviews.
               </p>
-              <h2 className="text-2xl font-bold text-slate-900">Share your experience</h2>
+              <h2 className="text-2xl font-bold text-slate-900" id="review-modal-title">
+                Share your experience
+              </h2>
             </div>
 
             <form className="mt-5 grid gap-4 overflow-y-auto pr-1" style={{ maxHeight: "calc(90vh - 120px)" }} onSubmit={(e) => e.preventDefault()}>

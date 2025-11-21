@@ -33,18 +33,26 @@ const DoctorProfileModal = ({
 
   if (!isOpen) return null;
 
+  const titleId = `doctor-modal-title-${doctor.name.replace(/\s+/g, "-")}`;
+  const descId = `doctor-modal-desc-${doctor.name.replace(/\s+/g, "-")}`;
+
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center overflow-y-auto bg-black/60 px-4 py-6 sm:items-center">
       <div
         className="w-full max-w-3xl rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200 sm:p-8 max-h-[calc(100vh-3rem)] overflow-y-auto"
         role="dialog"
         aria-modal="true"
-        aria-label={`Doctor profile for ${doctor.name}`}
+        aria-labelledby={titleId}
+        aria-describedby={descId}
       >
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500">{doctor.role}</p>
-            <h4 className="text-2xl font-bold text-slate-900">{doctor.name}</h4>
+            <p className="text-sm font-semibold uppercase tracking-wide text-slate-500" id={descId}>
+              {doctor.role}
+            </p>
+            <h4 className="text-2xl font-bold text-slate-900" id={titleId}>
+              {doctor.name}
+            </h4>
           </div>
           <button
             type="button"
