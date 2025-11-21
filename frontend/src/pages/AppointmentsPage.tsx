@@ -40,12 +40,12 @@ const AppointmentsPage = () => {
           <div className="grid gap-5 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.name")}
-              <input type="text" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base sm:text-lg" />
+              <input type="text" required className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg" />
               <span className="text-sm text-red-700">{t("appointments.errors.required")}</span>
             </label>
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.fatherName", { defaultValue: "Father name" })}
-              <input type="text" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base sm:text-lg" />
+              <input type="text" required className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg" />
               <span className="text-sm text-red-700">
                 {t("appointments.errors.fatherName", { defaultValue: "Please enter the father name" })}
               </span>
@@ -58,14 +58,14 @@ const AppointmentsPage = () => {
               <input
                 type="email"
                 required
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base sm:text-lg"
+                className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
                 placeholder="you@example.com"
               />
               <span className="text-sm text-red-700">{t("appointments.errors.email")}</span>
             </label>
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.motherName", { defaultValue: "Mother name" })}
-              <input type="text" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base sm:text-lg" />
+              <input type="text" required className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg" />
               <span className="text-sm text-red-700">
                 {t("appointments.errors.motherName", { defaultValue: "Please enter the mother name" })}
               </span>
@@ -75,7 +75,7 @@ const AppointmentsPage = () => {
           <div className="grid gap-5 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.phone")}
-              <div className="flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-3 py-3 text-base sm:text-lg">
+              <div className="flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:py-3 sm:text-lg">
                 <span className="rounded-xl bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 select-none">+961</span>
                 <input
                   type="tel"
@@ -93,7 +93,7 @@ const AppointmentsPage = () => {
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.department")}
               <select
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base sm:text-lg"
+                className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
                 value={doctorValue}
                 onChange={(event) => {
                   setDoctorValue(event.target.value);
@@ -118,7 +118,7 @@ const AppointmentsPage = () => {
                 pattern="^\\d{1,2}$"
                 maxLength={2}
                 required
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg"
+                className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
                 placeholder="30"
                 title="Enter an age up to 2 digits"
               />
@@ -129,7 +129,7 @@ const AppointmentsPage = () => {
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
                 {t("appointments.gender", { defaultValue: "Gender" })}
-                <select className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" required>
+                <select className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg" required>
                   <option value="">{t("appointments.gender", { defaultValue: "Gender" })}</option>
                   {genders.map((g) => (
                     <option key={g}>{g}</option>
@@ -141,7 +141,7 @@ const AppointmentsPage = () => {
               </label>
               <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
                 {t("appointments.bloodType", { defaultValue: "Blood type" })}
-                <select className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" required>
+                <select className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg" required>
                   <option value="">{t("appointments.bloodType", { defaultValue: "Blood type" })}</option>
                   {bloodTypes.map((b) => (
                     <option key={b}>{b}</option>
@@ -157,7 +157,7 @@ const AppointmentsPage = () => {
           <div className="grid gap-5 md:grid-cols-2">
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.dob", { defaultValue: "Date of birth" })}
-              <input type="date" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" />
+              <input type="date" required className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg" />
               <span className="text-sm text-red-700">
                 {t("appointments.errors.dob", { defaultValue: "Please enter date of birth" })}
               </span>
@@ -165,7 +165,7 @@ const AppointmentsPage = () => {
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
                 {t("appointments.patientStatus", { defaultValue: "Patient status" })}
-                <select className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" required>
+                <select className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg" required>
                   <option value="">{t("appointments.patientStatus", { defaultValue: "Patient status" })}</option>
                   <option value="new">{t("appointments.newPatient", { defaultValue: "New patient" })}</option>
                   <option value="returning">{t("appointments.returningPatient", { defaultValue: "Returning patient" })}</option>
@@ -182,7 +182,7 @@ const AppointmentsPage = () => {
               {t("appointments.insurance", { defaultValue: "Insurance provider" })}
               <input
                 type="text"
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg"
+                className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
                 placeholder={t("appointments.insurancePlaceholder", { defaultValue: "Provider name" })}
               />
               <span className="text-sm text-red-700">
@@ -193,7 +193,7 @@ const AppointmentsPage = () => {
               {t("appointments.policy", { defaultValue: "Policy number" })}
               <input
                 type="text"
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg"
+                className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
                 placeholder={t("appointments.policyPlaceholder", { defaultValue: "Policy / ID" })}
               />
               <span className="text-sm text-red-700">
@@ -206,7 +206,7 @@ const AppointmentsPage = () => {
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.doctor")}
               <select
-                className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg"
+                className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
                 value={doctorValue}
                 onChange={(event) => {
                   setDoctorValue(event.target.value);
@@ -222,7 +222,7 @@ const AppointmentsPage = () => {
             </label>
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
               {t("appointments.urgency", { defaultValue: "Case urgency" })}
-              <select className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" required>
+              <select className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg" required>
                 <option value="">{t("appointments.urgencyPlaceholder", { defaultValue: "Select urgency" })}</option>
                 {urgencyOptions.map((level) => (
                   <option key={level}>{level}</option>
@@ -233,12 +233,12 @@ const AppointmentsPage = () => {
             <div className="grid gap-5 sm:grid-cols-2">
               <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
                 {t("appointments.date")}
-                <input type="date" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" />
+                <input type="date" required className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg" />
                 <span className="text-sm text-red-700">{t("appointments.errors.date")}</span>
               </label>
               <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
                 {t("appointments.time")}
-                <input type="time" required className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg" />
+                <input type="time" required className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg" />
                 <span className="text-sm text-red-700">{t("appointments.errors.time")}</span>
               </label>
             </div>
@@ -247,9 +247,9 @@ const AppointmentsPage = () => {
           <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
             {t("appointments.reason")}
             <textarea
-              rows={4}
+              rows={3}
               required
-              className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg"
+              className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
               placeholder={t("appointments.reasonExample")}
             />
             <span className="text-sm text-red-700">{t("appointments.errors.reason")}</span>
@@ -258,8 +258,8 @@ const AppointmentsPage = () => {
           <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
             {t("appointments.notes", { defaultValue: "Additional notes / allergies" })}
             <textarea
-              rows={3}
-              className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-lg"
+              rows={2}
+              className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
               placeholder={t("appointments.notesPlaceholder", { defaultValue: "Allergies, medications, past surgeries..." })}
             />
             <span className="text-sm text-red-700">
@@ -273,7 +273,7 @@ const AppointmentsPage = () => {
               type="file"
               accept="application/pdf"
               required
-              className="rounded-2xl border border-dashed border-slate-300 bg-white px-4 py-3 text-lg file:mr-4 file:rounded-lg file:border-0 file:bg-blue-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-800"
+              className="w-full rounded-2xl border border-dashed border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg file:mr-4 file:rounded-lg file:border-0 file:bg-blue-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-800"
             />
             <span className="text-sm text-red-700">
               {t("appointments.errors.idUpload", { defaultValue: "Please upload a PDF of your ID or passport" })}

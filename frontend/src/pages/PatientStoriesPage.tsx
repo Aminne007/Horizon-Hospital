@@ -59,7 +59,7 @@ const PatientStoriesPage = () => {
                   <input
                     required
                     type="text"
-                    className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base"
+                    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
                     placeholder="Your full name"
                   />
                 </label>
@@ -68,7 +68,7 @@ const PatientStoriesPage = () => {
                   <input
                     required
                     type="text"
-                    className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base"
+                    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
                     placeholder="Document number"
                   />
                 </label>
@@ -80,7 +80,7 @@ const PatientStoriesPage = () => {
                   <input
                     required
                     type="date"
-                    className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base"
+                    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
                   />
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-semibold text-slate-900">
@@ -88,7 +88,7 @@ const PatientStoriesPage = () => {
                   <input
                     required
                     type="text"
-                    className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base"
+                    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
                     placeholder="e.g., Cardiology - Dr. Ava Thompson"
                   />
                 </label>
@@ -98,8 +98,8 @@ const PatientStoriesPage = () => {
                 Brief visit details (for verification)
                 <textarea
                   required
-                  rows={3}
-                  className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base"
+                  rows={2}
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
                   placeholder="Mention your visit purpose and any reference numbers."
                 />
               </label>
@@ -108,8 +108,8 @@ const PatientStoriesPage = () => {
                 Your review
                 <textarea
                   required
-                  rows={4}
-                  className="rounded-2xl border border-slate-300 bg-white px-4 py-3 text-base"
+                  rows={3}
+                  className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
                   placeholder="Describe your experience and wishes for others."
                 />
               </label>
