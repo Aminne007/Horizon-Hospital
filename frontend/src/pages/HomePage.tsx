@@ -10,22 +10,47 @@ import { useDoctorSelection } from "../context/DoctorSelectionContext";
 
 const HomePage = () => {
   const { t } = useTranslation();
-  const services = t("home.services", { returnObjects: true }) as { title: string; desc: string; icon: string }[];
+
+  const services = t("home.services", { returnObjects: true }) as {
+    title: string;
+    desc: string;
+    icon: string;
+  }[];
+
   const departments = t("home.departments", { returnObjects: true }) as string[];
   const featuredDepartments = departments.slice(0, 4);
-  const doctors = t("home.doctors", { returnObjects: true }) as { name: string; role: string; note: string }[];
-  const stats = t("home.stats", { returnObjects: true }) as { label: string; value: string }[];
-  const testimonials = t("home.testimonials", { returnObjects: true }) as { quote: string; name: string }[];
-  const placeholders = t("common.placeholders", { returnObjects: true }) as Record<string, string>;
+
+  const doctors = t("home.doctors", { returnObjects: true }) as {
+    name: string;
+    role: string;
+    note: string;
+  }[];
+
+  const stats = t("home.stats", { returnObjects: true }) as {
+    label: string;
+    value: string;
+  }[];
+
+  const testimonials = t("home.testimonials", { returnObjects: true }) as {
+    quote: string;
+    name: string;
+  }[];
+
+  const placeholders = t("common.placeholders", {
+    returnObjects: true,
+  }) as Record<string, string>;
+
   const prefersReducedMotion = useMemo(() => {
     if (typeof window === "undefined" || !window.matchMedia) return false;
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
+
   const [activeTestimonial, setActiveTestimonial] = useState(0);
-  const [activeDoctor, setActiveDoctor] = useState<null | typeof doctors[0]>(null);
+  const [activeDoctor, setActiveDoctor] = useState<null | (typeof doctors)[0]>(null);
   const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
   const navigate = useNavigate();
   const { setSelectedDoctor } = useDoctorSelection();
+
   const formattedDates = useMemo(
     () =>
       doctors.map((_, idx) =>
@@ -35,11 +60,13 @@ const HomePage = () => {
       ),
     [doctors]
   );
+
   const handleDoctorBook = (name: string) => {
     setSelectedDoctor(name);
     navigate(`/appointments?doctor=${encodeURIComponent(name)}`);
     setIsDoctorModalOpen(false);
   };
+
   const heroSlides = useMemo(
     () => [
       {
@@ -60,31 +87,34 @@ const HomePage = () => {
     ],
     []
   );
+
   const [activeSlide, setActiveSlide] = useState(0);
   const quickStats = stats.slice(0, 3);
+
   useScrollReveal();
 
   useEffect(() => {
     if (prefersReducedMotion) return;
-    const id = setInterval(() => {
-      setActiveTestimonial((prev) => (prev + 1) % testimonials.length);
-    }, 5000);
+    const id = setInterval(
+      () => setActiveTestimonial((prev) => (prev + 1) % testimonials.length),
+      5000
+    );
     return () => clearInterval(id);
   }, [prefersReducedMotion, testimonials.length]);
 
   useEffect(() => {
     if (prefersReducedMotion) return;
-    const id = setInterval(() => {
-      setActiveSlide((prev) => (prev + 1) % heroSlides.length);
-    }, 6000);
+    const id = setInterval(
+      () => setActiveSlide((prev) => (prev + 1) % heroSlides.length),
+      6000
+    );
     return () => clearInterval(id);
   }, [prefersReducedMotion, heroSlides.length]);
 
   return (
     <div className="bg-white text-slate-900">
-      <div className="w-full px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-10">
-        <div className="mx-auto w-full max-w-6xl">
-      <section className="relative isolate w-full min-h-[60vh] md:min-h-[70vh] overflow-hidden bg-slate-950 text-white">
+      {/* HERO */}
+      <section className="relative isolate w-full min-h-[40vh] md:min-h-[50vh] overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0" aria-hidden="true">
           {heroSlides.map((slide, idx) => (
             <div
@@ -108,12 +138,13 @@ const HomePage = () => {
             </div>
           ))}
         </div>
+
         <div
           className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-950/50 to-slate-950/15"
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto flex min-h-[60vh] flex-col justify-center px-4 py-8 sm:py-10 md:max-w-5xl lg:max-w-6xl lg:py-14">
+        <div className="relative mx-auto flex min-h-[30vh] flex-col justify-center px-4 py-8 sm:py-10 md:max-w-5xl lg:max-w-6xl lg:py-14">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:gap-10">
             <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 px-5 py-6 shadow-2xl backdrop-blur-2xl ring-1 ring-white/25 sm:px-7 sm:py-8 lg:px-10 lg:py-12 animate-soft-fade scroll-reveal">
               <div className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full bg-blue-400/25 blur-3xl" />
@@ -123,7 +154,9 @@ const HomePage = () => {
               <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-blue-100">
                 Trusted Care - Calm Spaces
               </p>
-              <h1 className="mt-3 text-[clamp(2rem,5vw,3.5rem)] font-black leading-[1.05] sm:mt-4">{t("common.hospitalName")}</h1>
+              <h1 className="mt-3 text-[clamp(2rem,5vw,3.5rem)] font-black leading-[1.05] sm:mt-4">
+                {t("common.hospitalName")}
+              </h1>
               <p className="mt-4 max-w-2xl text-[clamp(1rem,2.6vw,1.25rem)] text-blue-50/90">
                 Premium diagnostics, surgical suites, and attentive teams guiding every visit with clarity and calm.
               </p>
@@ -143,7 +176,7 @@ const HomePage = () => {
               </div>
             </div>
 
-            <div className="hidden w-full grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 shadow-lg backdrop-blur sm:grid lg:max-w-xs">
+            <div className="hidden w-full grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 shadow-lg backdrop-blur min-[1071px]:grid lg:max-w-xs">
               {quickStats.map((stat) => (
                 <div
                   key={stat.label}
@@ -173,6 +206,7 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* SIGNATURE SERVICES */}
       <section className="w-full px-4 py-10 sm:py-12">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <h2 className="text-2xl font-bold sm:text-3xl">{t("home.servicesTitle")}</h2>
@@ -185,7 +219,9 @@ const HomePage = () => {
               className="group rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
             >
               <div className="flex items-center gap-3">
-                <span className="text-xl sm:text-2xl transition duration-200 group-hover:scale-110">{service.icon}</span>
+                <span className="text-xl sm:text-2xl transition duration-200 group-hover:scale-110">
+                  {service.icon}
+                </span>
                 <p className="text-lg font-semibold text-slate-900 sm:text-xl">{service.title}</p>
               </div>
               <p className="mt-3 text-base text-slate-700 sm:text-lg">{service.desc}</p>
@@ -197,6 +233,7 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* FEATURED DEPARTMENTS */}
       <section className="bg-slate-50 py-10 sm:py-12">
         <div className="w-full px-3 sm:px-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -212,7 +249,9 @@ const HomePage = () => {
                 to={`/departments/${dept.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/(^-|-$)/g, "")}`}
                 className="group rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 hover-lift scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
               >
-                <p className="text-base font-semibold text-slate-900 transition duration-200 group-hover:text-blue-900 sm:text-lg">{dept}</p>
+                <p className="text-base font-semibold text-slate-900 transition duration-200 group-hover:text-blue-900 sm:text-lg">
+                  {dept}
+                </p>
                 <div className="mt-2 h-24 rounded-xl bg-slate-100 text-center text-sm text-slate-500 transition duration-200 group-hover:bg-slate-200">
                   {placeholders.departmentImage}
                 </div>
@@ -222,44 +261,46 @@ const HomePage = () => {
         </div>
       </section>
 
-        <section className="hidden w-full px-4 py-12 md:block">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-3xl font-bold">{t("home.doctorsTitle")}</h2>
-            <Link to="/doctors" className="text-lg font-semibold text-blue-900 underline">
-              {t("common.nav.doctors")}
-            </Link>
-          </div>
-          <div className="mt-8 grid gap-6 md:grid-cols-3">
-            {doctors.map((doc) => (
-              <div
-                key={doc.name}
-                className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift cursor-pointer"
-                onClick={() => {
-                  setActiveDoctor(doc);
-                  setIsDoctorModalOpen(true);
+      {/* DOCTORS (DESKTOP) */}
+      <section className="hidden w-full px-4 py-12 md:block">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <h2 className="text-3xl font-bold">{t("home.doctorsTitle")}</h2>
+          <Link to="/doctors" className="text-lg font-semibold text-blue-900 underline">
+            {t("common.nav.doctors")}
+          </Link>
+        </div>
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {doctors.map((doc) => (
+            <div
+              key={doc.name}
+              className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift cursor-pointer"
+              onClick={() => {
+                setActiveDoctor(doc);
+                setIsDoctorModalOpen(true);
+              }}
+            >
+              <div className="h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
+                {placeholders.doctorImage}
+              </div>
+              <p className="mt-4 text-xl font-bold text-slate-900">{doc.name}</p>
+              <p className="text-base font-semibold text-blue-900">{doc.role}</p>
+              <p className="mt-2 text-base text-slate-700">{doc.note}</p>
+              <button
+                type="button"
+                className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-lg font-semibold text-white"
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleDoctorBook(doc.name);
                 }}
               >
-                <div className="h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
-                  {placeholders.doctorImage}
-                </div>
-                <p className="mt-4 text-xl font-bold text-slate-900">{doc.name}</p>
-                <p className="text-base font-semibold text-blue-900">{doc.role}</p>
-                <p className="mt-2 text-base text-slate-700">{doc.note}</p>
-                <button
-                  type="button"
-                  className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-lg font-semibold text-white"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleDoctorBook(doc.name);
-                  }}
-                >
-                  {t("common.bookNow")}
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
+                {t("common.bookNow")}
+              </button>
+            </div>
+          ))}
+        </div>
+      </section>
 
+      {/* TESTIMONIALS */}
       <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-12 text-white">
         <div className="mx-auto grid max-w-7xl gap-8 px-4 md:grid-cols-3">
           <div className="md:col-span-1">
@@ -269,14 +310,18 @@ const HomePage = () => {
           <div className="md:col-span-2 grid gap-4">
             <div className="rounded-3xl bg-white/10 p-6 shadow-lg ring-1 ring-white/10">
               <p className="text-lg">“{testimonials[activeTestimonial]?.quote}”</p>
-              <p className="mt-2 text-sm font-semibold text-blue-100">{testimonials[activeTestimonial]?.name}</p>
+              <p className="mt-2 text-sm font-semibold text-blue-100">
+                {testimonials[activeTestimonial]?.name}
+              </p>
             </div>
             <div className="flex items-center gap-2">
               {testimonials.map((_, idx) => (
                 <button
                   key={idx}
                   aria-label={`Go to testimonial ${idx + 1}`}
-                  className={`h-3 w-3 rounded-full border border-white/70 transition ${idx === activeTestimonial ? "bg-white" : "bg-transparent"}`}
+                  className={`h-3 w-3 rounded-full border border-white/70 transition ${
+                    idx === activeTestimonial ? "bg-white" : "bg-transparent"
+                  }`}
                   onClick={() => setActiveTestimonial(idx)}
                 />
               ))}
@@ -295,11 +340,11 @@ const HomePage = () => {
           education={t("doctorsPage.educationSample", { returnObjects: true }) as string[]}
           experience={t("doctorsPage.experienceSample", { returnObjects: true }) as string[]}
           specializations={t("doctorsPage.specializationsSample", { returnObjects: true }) as string[]}
-          updatedLabel={`Updated ${formattedDates[doctors.findIndex((doc) => doc.name === activeDoctor.name)] ?? formattedDates[0]}`}
+          updatedLabel={`Updated ${
+            formattedDates[doctors.findIndex((doc) => doc.name === activeDoctor.name)] ?? formattedDates[0]
+          }`}
         />
       )}
-        </div>
-      </div>
     </div>
   );
 };
