@@ -147,7 +147,7 @@ const HomePage = () => {
   return (
     <div className="bg-white text-slate-900">
       {/* HERO */}
-      <section className="relative isolate w-full min-h-[38vh] sm:min-h-[42vh] md:min-h-[45vh] lg:min-h-[52vh] overflow-hidden bg-slate-950 text-white">
+      <section className="relative isolate w-full min-h-[32vh] sm:min-h-[36vh] md:min-h-[38vh] lg:min-h-[46vh] overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0" aria-hidden="true">
           {heroSlides.map((slide, idx) => (
             <div
@@ -177,9 +177,9 @@ const HomePage = () => {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto flex min-h-[24vh] flex-col justify-center px-4 py-4 sm:py-6 md:max-w-5xl lg:max-w-6xl lg:py-8">
-          <div className="flex flex-col gap-5 lg:flex-row lg:items-end lg:gap-8">
-            <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 px-5 py-5 shadow-2xl backdrop-blur-2xl ring-1 ring-white/25 sm:px-6 sm:py-7 lg:px-9 lg:py-9 animate-soft-fade scroll-reveal">
+        <div className="relative mx-auto flex min-h-[18vh] flex-col justify-center px-4 py-3 sm:py-5 md:max-w-5xl lg:max-w-6xl lg:py-7">
+          <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-7">
+            <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 px-4 py-4 shadow-2xl backdrop-blur-2xl ring-1 ring-white/25 sm:px-6 sm:py-6 lg:px-8 lg:py-8 animate-soft-fade scroll-reveal">
               <div className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full bg-blue-400/25 blur-3xl" />
               <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-sky-300/20 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-16 right-10 h-32 w-32 rounded-full bg-cyan-400/15 blur-3xl" />
