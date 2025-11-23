@@ -240,16 +240,28 @@ const HomePage = () => {
       </section>
 
       {/* DOCTORS */}
-      <section className="w-full px-4 py-10 sm:py-12">
+      <section className="relative isolate w-full px-4 py-10 sm:py-12">
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-blue-50 via-white to-slate-50" aria-hidden="true" />
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-2xl font-bold sm:text-3xl">{t("home.doctorsTitle")}</h2>
-          <Link to="/doctors" className="text-base font-semibold text-blue-900 underline sm:text-lg">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-700 sm:text-sm">
+              Our specialists
+            </p>
+            <h2 className="text-2xl font-bold sm:text-3xl">{t("home.doctorsTitle")}</h2>
+            <p className="mt-1 text-sm text-slate-600 sm:text-base">
+              Meet the teams patients ask for most, with clear guidance and calm visits.
+            </p>
+          </div>
+          <Link
+            to="/doctors"
+            className="inline-flex items-center justify-center rounded-full border border-blue-200 bg-white px-4 py-2 text-sm font-semibold text-blue-900 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:bg-blue-50 sm:text-base"
+          >
             {t("common.nav.doctors")}
           </Link>
         </div>
         <div className="mt-8">
           {isMobileDoctors ? (
-            <div className="overflow-hidden rounded-3xl ring-1 ring-slate-100 shadow-md bg-white/80">
+            <div className="overflow-hidden rounded-3xl ring-1 ring-slate-100 shadow-md bg-white/90">
               <div
                 className="flex transition-transform duration-700 ease-in-out"
                 style={{ transform: `translateX(-${activeDoctorSlide * 100}%)` }}
@@ -257,7 +269,11 @@ const HomePage = () => {
                 {doctors.map((doc) => (
                   <div key={doc.name} className="min-w-full px-2 py-2">
                     <div className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100">
-                      <div className="h-32 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
+                      <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+                        <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-900">Featured</span>
+                        <span className="text-blue-500">24/7 care</span>
+                      </div>
+                      <div className="mt-3 h-32 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
                         {placeholders.doctorImage}
                       </div>
                       <p className="mt-3 text-lg font-bold text-slate-900">{doc.name}</p>
@@ -305,9 +321,13 @@ const HomePage = () => {
               {doctors.map((doc) => (
                 <div
                   key={doc.name}
-                  className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift"
+                  className="rounded-3xl bg-white p-5 shadow-[0_10px_45px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-100 hover:-translate-y-1 hover:shadow-[0_16px_60px_-18px_rgba(15,23,42,0.35)] transition"
                 >
-                  <div className="h-28 sm:h-32 md:h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
+                  <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
+                    <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-900">Featured</span>
+                    <span className="text-blue-500">24/7 care</span>
+                  </div>
+                  <div className="mt-3 h-28 sm:h-32 md:h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
                     {placeholders.doctorImage}
                   </div>
                   <p className="mt-3 text-lg font-bold text-slate-900 sm:text-xl">{doc.name}</p>
@@ -343,24 +363,37 @@ const HomePage = () => {
       </section>
 
       {/* SIGNATURE SERVICES */}
-      <section className="w-full px-4 py-10 sm:py-12">
+      <section className="w-full px-4 py-10 sm:py-12 bg-gradient-to-b from-white to-slate-50">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-2xl font-bold sm:text-3xl">{t("home.servicesTitle")}</h2>
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-700 sm:text-sm">
+              What we do best
+            </p>
+            <h2 className="text-2xl font-bold sm:text-3xl">{t("home.servicesTitle")}</h2>
+            <p className="mt-1 text-sm text-slate-600 sm:text-base">
+              Quick access to the departments patients rely on most.
+            </p>
+          </div>
         </div>
-        <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-8 grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
           {services.map((service) => (
             <Link
               key={service.title}
               to={`/services/${service.title.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/(^-|-$)/g, "")}`}
-              className="group rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
+              className="group rounded-3xl bg-white/90 p-5 shadow-[0_12px_40px_-18px_rgba(15,23,42,0.25)] ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-[0_18px_50px_-16px_rgba(15,23,42,0.28)] scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
             >
-              <div className="flex items-center gap-3">
-                <span className="text-xl sm:text-2xl transition duration-200 group-hover:scale-110">
-                  {service.icon}
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-xl sm:text-2xl transition duration-200 group-hover:scale-110">
+                    {service.icon}
+                  </span>
+                  <p className="text-lg font-semibold text-slate-900 sm:text-xl">{service.title}</p>
+                </div>
+                <span className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">
+                  24/7
                 </span>
-                <p className="text-lg font-semibold text-slate-900 sm:text-xl">{service.title}</p>
               </div>
-              <p className="mt-3 text-base text-slate-700 sm:text-lg">{service.desc}</p>
+              <p className="mt-3 text-sm text-slate-700 sm:text-base">{service.desc}</p>
               <div className="mt-4 rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-500 transition duration-200 group-hover:bg-slate-100">
                 {placeholders.serviceImage}
               </div>
@@ -370,25 +403,39 @@ const HomePage = () => {
       </section>
 
       {/* FEATURED DEPARTMENTS */}
-      <section className="bg-slate-50 py-10 sm:py-12">
+      <section className="bg-slate-900 py-10 sm:py-12 text-white">
         <div className="w-full px-3 sm:px-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <h2 className="text-2xl font-bold sm:text-3xl">{t("home.departmentsTitle")}</h2>
-            <Link to="/departments" className="text-base font-semibold text-blue-900 underline sm:text-lg">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-200 sm:text-sm">
+                Departments
+              </p>
+              <h2 className="text-2xl font-bold sm:text-3xl">{t("home.departmentsTitle")}</h2>
+              <p className="mt-1 text-sm text-slate-200/80 sm:text-base">
+                Coordinated teams across diagnostics, surgery, rehab, and beyond.
+              </p>
+            </div>
+            <Link
+              to="/departments"
+              className="inline-flex items-center justify-center rounded-full border border-white/30 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-white/60 sm:text-base"
+            >
               {t("common.nav.departments")}
             </Link>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-2 sm:gap-3 md:grid-cols-3 lg:grid-cols-4">
+          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
             {featuredDepartments.map((dept) => (
               <Link
                 key={dept}
                 to={`/departments/${dept.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/(^-|-$)/g, "")}`}
-                className="group rounded-2xl bg-white p-3 shadow-sm ring-1 ring-slate-100 hover-lift scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
+                className="group rounded-2xl bg-white/5 p-4 shadow-[0_10px_45px_-20px_rgba(0,0,0,0.35)] ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/10 hover:ring-white/30 scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-300/60"
               >
-                <p className="text-base font-semibold text-slate-900 transition duration-200 group-hover:text-blue-900 sm:text-lg">
-                  {dept}
-                </p>
-                <div className="mt-2 h-24 rounded-xl bg-slate-100 text-center text-sm text-slate-500 transition duration-200 group-hover:bg-slate-200">
+                <div className="flex items-center justify-between">
+                  <p className="text-base font-semibold text-white transition duration-200 group-hover:text-sky-100 sm:text-lg">
+                    {dept}
+                  </p>
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200">Care</span>
+                </div>
+                <div className="mt-3 h-24 rounded-xl bg-slate-800/60 text-center text-sm text-slate-200 transition duration-200 group-hover:bg-slate-800">
                   {placeholders.departmentImage}
                 </div>
               </Link>

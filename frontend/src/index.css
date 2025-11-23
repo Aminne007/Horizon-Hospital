@@ -11,7 +11,8 @@
     background-color: #f5f7fb;
     text-rendering: optimizeLegibility;
     -webkit-font-smoothing: antialiased;
-    font-size: clamp(15px, 1.2vw + 12px, 18px);
+    /* Responsive base font size: scales down more on narrow viewports to keep text comfortable */
+    font-size: clamp(14px, 0.9vw + 11px, 17px);
     line-height: 1.7;
   }
 
