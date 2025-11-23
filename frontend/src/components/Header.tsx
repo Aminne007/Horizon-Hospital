@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, useLocation } from "react-router-dom";
 
@@ -24,9 +24,28 @@ const Header = () => {
     [t]
   );
 
+  useEffect(() => {
+    setOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+
+    const mq = window.matchMedia("(min-width: 1024px)");
+    const closeIfWide = (event?: MediaQueryListEvent) => {
+      if ((event && event.matches) || (!event && mq.matches)) {
+        setOpen(false);
+      }
+    };
+
+    closeIfWide();
+    mq.addEventListener("change", closeIfWide);
+    return () => mq.removeEventListener("change", closeIfWide);
+  }, []);
+
   return (
     <header className="sticky top-0 z-50 border-b border-white/40 bg-white/60 backdrop-blur-xl shadow-md relative">
-      <div className="mx-auto flex w-full max-w-6xl lg:max-w-7xl items-center justify-between px-4 py-3 sm:py-4">
+      <div className="mx-auto flex w-full items-center justify-between px-4 py-3 sm:py-4 md:px-6">
         <Link to="/" className="flex items-center gap-2 sm:gap-3" onClick={() => setOpen(false)}>
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-blue-900 to-blue-600 text-lg font-bold text-white shadow-lg ring-1 ring-white/40 backdrop-blur">
             HC
@@ -56,13 +75,13 @@ const Header = () => {
               {emergencyNumber}
             </span>
           </a>
-          <div className="hidden items-center gap-2 xl:flex">
+          <div className="hidden items-center gap-2 lg:flex">
             {navLinks.map((link) => (
               <NavLink
                 key={link.path}
                 to={link.path}
                 className={({ isActive }) =>
-                  `rounded-full px-3 py-2 text-sm font-semibold transition duration-300 backdrop-blur border border-white/40 xl:text-base xl:px-4 ${
+                  `rounded-full px-3 py-2 text-sm font-semibold transition duration-300 backdrop-blur border border-white/40 lg:text-base lg:px-4 ${
                     isActive
                       ? "bg-white/70 text-slate-900 shadow-lg ring-1 ring-white/50 scale-[1.04]"
                       : "bg-white/10 text-slate-900 hover:bg-white/30 hover:shadow-md hover:-translate-y-0.5"
@@ -80,7 +99,7 @@ const Header = () => {
           <button
             type="button"
             onClick={() => setOpen((prev) => !prev)}
-            className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/40 px-3 py-2 text-slate-900 shadow-sm backdrop-blur xl:hidden"
+            className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/40 px-3 py-2 text-slate-900 shadow-sm backdrop-blur lg:hidden"
             aria-label="Menu"
             aria-expanded={open}
           >

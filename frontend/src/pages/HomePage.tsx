@@ -301,34 +301,43 @@ const HomePage = () => {
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-12 text-white">
-        <div className="mx-auto grid max-w-7xl gap-8 px-4 md:grid-cols-3">
+      <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-8 sm:py-12 text-white">
+        <div className="mx-auto grid max-w-7xl gap-4 sm:gap-6 px-3 sm:px-4 md:grid-cols-3">
           <div className="md:col-span-1">
-            <h3 className="text-3xl font-bold">{t("home.testimonialsTitle")}</h3>
-            <p className="mt-2 text-lg text-blue-100">{t("home.testimonialsSubtitle")}</p>
+            <h3 className="text-lg sm:text-2xl md:text-3xl font-bold">
+              {t("home.testimonialsTitle")}
+            </h3>
+            <p className="mt-2 text-sm sm:text-base md:text-lg text-blue-100">
+              {t("home.testimonialsSubtitle")}
+            </p>
           </div>
-          <div className="md:col-span-2 grid gap-4">
-            <div className="rounded-3xl bg-white/10 p-6 shadow-lg ring-1 ring-white/10">
-              <p className="text-lg">“{testimonials[activeTestimonial]?.quote}”</p>
-              <p className="mt-2 text-sm font-semibold text-blue-100">
+
+          <div className="md:col-span-2 grid gap-3 sm:gap-4">
+            <div className="rounded-3xl bg-white/10 p-3 sm:p-5 md:p-6 shadow-lg ring-1 ring-white/10">
+              <p className="text-sm sm:text-base md:text-lg">
+                &ldquo;{testimonials[activeTestimonial]?.quote}&rdquo;
+              </p>
+              <p className="mt-2 text-xs sm:text-sm font-semibold text-blue-100">
                 {testimonials[activeTestimonial]?.name}
               </p>
             </div>
-            <div className="flex items-center gap-2">
+
+            <div className="flex items-center gap-1.5 sm:gap-2">
               {testimonials.map((_, idx) => (
                 <button
                   key={idx}
                   aria-label={`Go to testimonial ${idx + 1}`}
-                  className={`h-3 w-3 rounded-full border border-white/70 transition ${
-                    idx === activeTestimonial ? "bg-white" : "bg-transparent"
-                  }`}
                   onClick={() => setActiveTestimonial(idx)}
+                  className={`rounded-full border border-white/70 transition ${
+                    idx === activeTestimonial ? "bg-white" : "bg-transparent"
+                  } h-2 w-2 sm:h-3 sm:w-3`}
                 />
               ))}
             </div>
           </div>
         </div>
       </section>
+
 
       {activeDoctor && (
         <DoctorProfileModal
