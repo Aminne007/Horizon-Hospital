@@ -129,7 +129,7 @@ const HomePage = () => {
     const mq = window.matchMedia("(max-width: 767px)");
     const update = () => setIsMobileDoctors(mq.matches);
     update();
-    const listener = (event: MediaQueryListEvent) => update();
+    const listener = () => update();
     mq.addEventListener ? mq.addEventListener("change", listener) : mq.addListener(listener);
     return () => {
       mq.removeEventListener ? mq.removeEventListener("change", listener) : mq.removeListener(listener);
@@ -147,7 +147,7 @@ const HomePage = () => {
   return (
     <div className="bg-white text-slate-900">
       {/* HERO */}
-      <section className="relative isolate w-full min-h-[40vh] md:min-h-[50vh] overflow-hidden bg-slate-950 text-white">
+      <section className="relative isolate w-full min-h-[55vh] sm:min-h-[60vh] md:min-h-[65vh] lg:min-h-[70vh] max-h-[90vh] overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0" aria-hidden="true">
           {heroSlides.map((slide, idx) => (
             <div
@@ -177,7 +177,7 @@ const HomePage = () => {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto flex min-h-[30vh] flex-col justify-center px-4 py-8 sm:py-10 md:max-w-5xl lg:max-w-6xl lg:py-14">
+        <div className="relative mx-auto flex min-h-[35vh] flex-col justify-center px-4 py-6 sm:py-8 md:max-w-5xl lg:max-w-6xl lg:py-12">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:gap-10">
             <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 px-5 py-6 shadow-2xl backdrop-blur-2xl ring-1 ring-white/25 sm:px-7 sm:py-8 lg:px-10 lg:py-12 animate-soft-fade scroll-reveal">
               <div className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full bg-blue-400/25 blur-3xl" />
@@ -254,7 +254,7 @@ const HomePage = () => {
                 className="flex transition-transform duration-700 ease-in-out"
                 style={{ transform: `translateX(-${activeDoctorSlide * 100}%)` }}
               >
-                {doctors.map((doc, idx) => (
+                {doctors.map((doc) => (
                   <div key={doc.name} className="min-w-full px-2 py-2">
                     <div className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100">
                       <div className="h-32 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
@@ -277,8 +277,7 @@ const HomePage = () => {
                         <button
                           type="button"
                           className="inline-flex items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
-                          onClick={(event) => {
-                            event.stopPropagation();
+                          onClick={() => {
                             handleDoctorBook(doc.name);
                           }}
                         >
