@@ -48,6 +48,8 @@ const HomePage = () => {
   const [activeTestimonialGroup, setActiveTestimonialGroup] = useState(0);
   const [activeDoctor, setActiveDoctor] = useState<null | (typeof doctors)[0]>(null);
   const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
+  const [activeDoctorSlide, setActiveDoctorSlide] = useState(0);
+  const [isMobileDoctors, setIsMobileDoctors] = useState(false);
   const navigate = useNavigate();
   const { setSelectedDoctor } = useDoctorSelection();
   const testimonialsPerPage = 3;
@@ -121,6 +123,26 @@ const HomePage = () => {
     );
     return () => clearInterval(id);
   }, [prefersReducedMotion, heroSlides.length]);
+
+  useEffect(() => {
+    if (typeof window === "undefined" || !window.matchMedia) return;
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobileDoctors(mq.matches);
+    update();
+    const listener = (event: MediaQueryListEvent) => update();
+    mq.addEventListener ? mq.addEventListener("change", listener) : mq.addListener(listener);
+    return () => {
+      mq.removeEventListener ? mq.removeEventListener("change", listener) : mq.removeListener(listener);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isMobileDoctors || prefersReducedMotion || doctors.length <= 1) return;
+    const id = setInterval(() => {
+      setActiveDoctorSlide((prev) => (prev + 1) % doctors.length);
+    }, 5000);
+    return () => clearInterval(id);
+  }, [isMobileDoctors, prefersReducedMotion, doctors.length]);
 
   return (
     <div className="bg-white text-slate-900">
@@ -217,50 +239,107 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* DOCTORS (DESKTOP) */}
-      <section className="hidden w-full px-4 py-12 md:block">
+      {/* DOCTORS */}
+      <section className="w-full px-4 py-10 sm:py-12">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-3xl font-bold">{t("home.doctorsTitle")}</h2>
-          <Link to="/doctors" className="text-lg font-semibold text-blue-900 underline">
+          <h2 className="text-2xl font-bold sm:text-3xl">{t("home.doctorsTitle")}</h2>
+          <Link to="/doctors" className="text-base font-semibold text-blue-900 underline sm:text-lg">
             {t("common.nav.doctors")}
           </Link>
         </div>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {doctors.map((doc) => (
-            <div
-              key={doc.name}
-              className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift"
-            >
-              <div className="h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
-                {placeholders.doctorImage}
+        <div className="mt-8">
+          {isMobileDoctors ? (
+            <div className="overflow-hidden rounded-3xl ring-1 ring-slate-100 shadow-md bg-white/80">
+              <div
+                className="flex transition-transform duration-700 ease-in-out"
+                style={{ transform: `translateX(-${activeDoctorSlide * 100}%)` }}
+              >
+                {doctors.map((doc, idx) => (
+                  <div key={doc.name} className="min-w-full px-2 py-2">
+                    <div className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100">
+                      <div className="h-32 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
+                        {placeholders.doctorImage}
+                      </div>
+                      <p className="mt-3 text-lg font-bold text-slate-900">{doc.name}</p>
+                      <p className="text-sm font-semibold text-blue-900">{doc.role}</p>
+                      <p className="mt-2 text-sm text-slate-700">{doc.note}</p>
+                      <div className="mt-4 grid gap-2">
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
+                          onClick={() => {
+                            setActiveDoctor(doc);
+                            setIsDoctorModalOpen(true);
+                          }}
+                        >
+                          {t("common.learnMore", { defaultValue: "View Profile" })}
+                        </button>
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            handleDoctorBook(doc.name);
+                          }}
+                        >
+                          {t("common.bookNow")}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
-              <p className="mt-4 text-xl font-bold text-slate-900">{doc.name}</p>
-              <p className="text-base font-semibold text-blue-900">{doc.role}</p>
-              <p className="mt-2 text-base text-slate-700">{doc.note}</p>
-              <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-base font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
-                  onClick={() => {
-                    setActiveDoctor(doc);
-                    setIsDoctorModalOpen(true);
-                  }}
-                >
-                  {t("common.learnMore", { defaultValue: "View Profile" })}
-                </button>
-                <button
-                  type="button"
-                  className="inline-flex items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-base font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    handleDoctorBook(doc.name);
-                  }}
-                >
-                  {t("common.bookNow")}
-                </button>
+              <div className="flex justify-center gap-2 pb-3 pt-2">
+                {doctors.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    aria-label={`Go to doctor ${idx + 1}`}
+                    onClick={() => setActiveDoctorSlide(idx)}
+                    className={`h-2 rounded-full transition ${idx === activeDoctorSlide ? "w-6 bg-blue-800" : "w-2 bg-slate-300"}`}
+                  />
+                ))}
               </div>
             </div>
-          ))}
+          ) : (
+            <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
+              {doctors.map((doc) => (
+                <div
+                  key={doc.name}
+                  className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift"
+                >
+                  <div className="h-28 sm:h-32 md:h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
+                    {placeholders.doctorImage}
+                  </div>
+                  <p className="mt-3 text-lg font-bold text-slate-900 sm:text-xl">{doc.name}</p>
+                  <p className="text-sm font-semibold text-blue-900 sm:text-base">{doc.role}</p>
+                  <p className="mt-2 text-sm text-slate-700 sm:text-base">{doc.note}</p>
+                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 sm:text-base"
+                      onClick={() => {
+                        setActiveDoctor(doc);
+                        setIsDoctorModalOpen(true);
+                      }}
+                    >
+                      {t("common.learnMore", { defaultValue: "View Profile" })}
+                    </button>
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 sm:text-base"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        handleDoctorBook(doc.name);
+                      }}
+                    >
+                      {t("common.bookNow")}
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
 
