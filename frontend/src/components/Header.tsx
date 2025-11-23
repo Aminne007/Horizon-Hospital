@@ -59,7 +59,7 @@ const Header = () => {
         <div className="flex items-center gap-3">
           <a
             href={emergencyHref}
-            className="inline-flex items-center gap-2 rounded-full bg-red-600 px-2.5 py-2 text-xs font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-red-700 focus-visible:ring-4 focus-visible:ring-red-300/70 sm:px-3 sm:text-sm"
+            className="inline-flex items-center justify-center rounded-full bg-red-600 px-2.5 py-2 text-xs font-bold text-white shadow-md transition hover:-translate-y-0.5 hover:bg-red-700 focus-visible:ring-4 focus-visible:ring-red-300/70 sm:px-3 sm:text-sm"
             aria-label={t("common.emergency", { defaultValue: "Emergency" })}
           >
             <span aria-hidden="true" className="flex h-5 w-5 items-center justify-center rounded-full bg-white/15">
@@ -70,12 +70,8 @@ const Header = () => {
                 />
               </svg>
             </span>
-            <span className="hidden sm:inline">{t("common.emergency", { defaultValue: "Emergency" })}</span>
-            <span className="sm:hidden" aria-hidden="true">
-              {emergencyNumber}
-            </span>
           </a>
-          <div className="hidden items-center gap-2 lg:flex">
+          <div className="hidden min-[1038px]:flex min-[1038px]:flex-wrap min-[1038px]:justify-end min-[1038px]:gap-2">
             {navLinks.map((link) => (
               <NavLink
                 key={link.path}
@@ -99,7 +95,7 @@ const Header = () => {
           <button
             type="button"
             onClick={() => setOpen((prev) => !prev)}
-            className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/40 px-3 py-2 text-slate-900 shadow-sm backdrop-blur lg:hidden"
+            className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/40 px-3 py-2 text-slate-900 shadow-sm backdrop-blur min-[1038px]:hidden"
             aria-label="Menu"
             aria-expanded={open}
           >
