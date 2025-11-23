@@ -147,7 +147,7 @@ const HomePage = () => {
   return (
     <div className="bg-white text-slate-900">
       {/* HERO */}
-      <section className="relative isolate w-full min-h-[50vh] sm:min-h-[54vh] md:min-h-[56vh] lg:min-h-[60vh] max-h-[86vh] overflow-hidden bg-slate-950 text-white">
+      <section className="relative isolate w-full min-h-[44vh] sm:min-h-[48vh] md:min-h-[50vh] lg:min-h-[56vh] overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0" aria-hidden="true">
           {heroSlides.map((slide, idx) => (
             <div
@@ -177,7 +177,7 @@ const HomePage = () => {
           aria-hidden="true"
         />
 
-        <div className="relative mx-auto flex min-h-[34vh] flex-col justify-center px-4 py-6 sm:py-8 md:max-w-5xl lg:max-w-6xl lg:py-10">
+        <div className="relative mx-auto flex min-h-[30vh] flex-col justify-center px-4 py-5 sm:py-7 md:max-w-5xl lg:max-w-6xl lg:py-9">
           <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:gap-10">
             <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 px-5 py-6 shadow-2xl backdrop-blur-2xl ring-1 ring-white/25 sm:px-7 sm:py-8 lg:px-10 lg:py-12 animate-soft-fade scroll-reveal">
               <div className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full bg-blue-400/25 blur-3xl" />
