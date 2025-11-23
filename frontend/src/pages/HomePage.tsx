@@ -45,11 +45,21 @@ const HomePage = () => {
     return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   }, []);
 
-  const [activeTestimonial, setActiveTestimonial] = useState(0);
+  const [activeTestimonialGroup, setActiveTestimonialGroup] = useState(0);
   const [activeDoctor, setActiveDoctor] = useState<null | (typeof doctors)[0]>(null);
   const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
   const navigate = useNavigate();
   const { setSelectedDoctor } = useDoctorSelection();
+  const testimonialsPerPage = 3;
+  const testimonialGroups = useMemo(() => {
+    const groups: typeof testimonials[] = [];
+    for (let i = 0; i < testimonials.length; i += testimonialsPerPage) {
+      groups.push(testimonials.slice(i, i + testimonialsPerPage));
+    }
+    return groups.length ? groups : [[]];
+  }, [testimonials]);
+  const totalTestimonialGroups = testimonialGroups.length;
+  const activeTestimonialGroupSafe = totalTestimonialGroups ? activeTestimonialGroup % totalTestimonialGroups : 0;
 
   const formattedDates = useMemo(
     () =>
@@ -95,12 +105,13 @@ const HomePage = () => {
 
   useEffect(() => {
     if (prefersReducedMotion) return;
+    if (!totalTestimonialGroups) return;
     const id = setInterval(
-      () => setActiveTestimonial((prev) => (prev + 1) % testimonials.length),
+      () => setActiveTestimonialGroup((prev) => (prev + 1) % totalTestimonialGroups),
       5000
     );
     return () => clearInterval(id);
-  }, [prefersReducedMotion, testimonials.length]);
+  }, [prefersReducedMotion, totalTestimonialGroups]);
 
   useEffect(() => {
     if (prefersReducedMotion) return;
@@ -124,7 +135,7 @@ const HomePage = () => {
               }`}
             >
               <div
-                className="absolute inset-0 bg-cover bg-center opacity-90"
+                className="absolute inset-0 bg-cover bg-center"
                 style={{ backgroundImage: slide.image ? `url(${slide.image})` : undefined }}
                 aria-hidden="true"
               />
@@ -206,6 +217,53 @@ const HomePage = () => {
         </div>
       </section>
 
+      {/* DOCTORS (DESKTOP) */}
+      <section className="hidden w-full px-4 py-12 md:block">
+        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <h2 className="text-3xl font-bold">{t("home.doctorsTitle")}</h2>
+          <Link to="/doctors" className="text-lg font-semibold text-blue-900 underline">
+            {t("common.nav.doctors")}
+          </Link>
+        </div>
+        <div className="mt-8 grid gap-6 md:grid-cols-3">
+          {doctors.map((doc) => (
+            <div
+              key={doc.name}
+              className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift"
+            >
+              <div className="h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
+                {placeholders.doctorImage}
+              </div>
+              <p className="mt-4 text-xl font-bold text-slate-900">{doc.name}</p>
+              <p className="text-base font-semibold text-blue-900">{doc.role}</p>
+              <p className="mt-2 text-base text-slate-700">{doc.note}</p>
+              <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-base font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
+                  onClick={() => {
+                    setActiveDoctor(doc);
+                    setIsDoctorModalOpen(true);
+                  }}
+                >
+                  {t("common.learnMore", { defaultValue: "View Profile" })}
+                </button>
+                <button
+                  type="button"
+                  className="inline-flex items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-base font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    handleDoctorBook(doc.name);
+                  }}
+                >
+                  {t("common.bookNow")}
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* SIGNATURE SERVICES */}
       <section className="w-full px-4 py-10 sm:py-12">
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
@@ -261,75 +319,55 @@ const HomePage = () => {
         </div>
       </section>
 
-      {/* DOCTORS (DESKTOP) */}
-      <section className="hidden w-full px-4 py-12 md:block">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <h2 className="text-3xl font-bold">{t("home.doctorsTitle")}</h2>
-          <Link to="/doctors" className="text-lg font-semibold text-blue-900 underline">
-            {t("common.nav.doctors")}
-          </Link>
-        </div>
-        <div className="mt-8 grid gap-6 md:grid-cols-3">
-          {doctors.map((doc) => (
-            <div
-              key={doc.name}
-              className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift cursor-pointer"
-              onClick={() => {
-                setActiveDoctor(doc);
-                setIsDoctorModalOpen(true);
-              }}
-            >
-              <div className="h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
-                {placeholders.doctorImage}
-              </div>
-              <p className="mt-4 text-xl font-bold text-slate-900">{doc.name}</p>
-              <p className="text-base font-semibold text-blue-900">{doc.role}</p>
-              <p className="mt-2 text-base text-slate-700">{doc.note}</p>
-              <button
-                type="button"
-                className="mt-4 inline-flex w-full items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-lg font-semibold text-white"
-                onClick={(event) => {
-                  event.stopPropagation();
-                  handleDoctorBook(doc.name);
-                }}
-              >
-                {t("common.bookNow")}
-              </button>
-            </div>
-          ))}
-        </div>
-      </section>
-
       {/* TESTIMONIALS */}
-      <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-8 sm:py-12 text-white">
-        <div className="mx-auto grid max-w-7xl gap-4 sm:gap-6 px-3 sm:px-4 md:grid-cols-3">
+      <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-4 sm:py-6 text-white">
+        <div className="mx-auto grid w-full gap-2 sm:gap-3 px-3 sm:px-4 md:grid-cols-3">
           <div className="md:col-span-1">
-            <h3 className="text-lg sm:text-2xl md:text-3xl font-bold">
+            <h3 className="text-base sm:text-xl md:text-2xl font-bold">
               {t("home.testimonialsTitle")}
             </h3>
-            <p className="mt-2 text-sm sm:text-base md:text-lg text-blue-100">
+            <p className="mt-2 text-xs sm:text-sm md:text-base text-blue-100">
               {t("home.testimonialsSubtitle")}
             </p>
           </div>
 
           <div className="md:col-span-2 grid gap-3 sm:gap-4">
-            <div className="rounded-3xl bg-white/10 p-3 sm:p-5 md:p-6 shadow-lg ring-1 ring-white/10">
-              <p className="text-sm sm:text-base md:text-lg">
-                &ldquo;{testimonials[activeTestimonial]?.quote}&rdquo;
-              </p>
-              <p className="mt-2 text-xs sm:text-sm font-semibold text-blue-100">
-                {testimonials[activeTestimonial]?.name}
-              </p>
+            <div className="overflow-hidden rounded-2xl bg-white/10 p-2 sm:p-3 md:p-4 shadow-lg ring-1 ring-white/10">
+              <div
+                className="flex transition-transform duration-700 ease-in-out"
+                style={{ transform: `translateX(-${activeTestimonialGroupSafe * 100}%)` }}
+              >
+                {testimonialGroups.map((group, groupIdx) => (
+                  <div
+                    key={groupIdx}
+                    className="grid min-w-full grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 px-1"
+                  >
+                    {group.map((story, idx) => (
+                      <div
+                        key={`${story.name}-${idx}`}
+                        className="rounded-2xl bg-white/5 p-2 sm:p-3 md:p-4 shadow-inner ring-1 ring-white/10"
+                      >
+                        <p className="text-xs sm:text-sm md:text-base">
+                          &ldquo;{story.quote}&rdquo;
+                        </p>
+                        <p className="mt-2 text-[11px] sm:text-xs font-semibold text-blue-100">
+                          {story.name}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div className="flex items-center gap-1.5 sm:gap-2">
-              {testimonials.map((_, idx) => (
+              {testimonialGroups.map((_, idx) => (
                 <button
                   key={idx}
-                  aria-label={`Go to testimonial ${idx + 1}`}
-                  onClick={() => setActiveTestimonial(idx)}
+                  aria-label={`Go to testimonial group ${idx + 1}`}
+                  onClick={() => setActiveTestimonialGroup(idx)}
                   className={`rounded-full border border-white/70 transition ${
-                    idx === activeTestimonial ? "bg-white" : "bg-transparent"
+                    idx === activeTestimonialGroupSafe ? "bg-white" : "bg-transparent"
                   } h-2 w-2 sm:h-3 sm:w-3`}
                 />
               ))}

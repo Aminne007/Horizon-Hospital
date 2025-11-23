@@ -78,6 +78,12 @@ const en = {
       { quote: "They explained every step and kept me calm. The rooms felt like a boutique hotel.", name: "Renee P." },
       { quote: "Scheduling was quick, and the doctors were patient and clear.", name: "Jamal F." },
       { quote: "I felt listened to. Recovery was smooth thanks to their rehab team.", name: "Priya D." },
+      { quote: "Nurses checked on me often and kept my family in the loop.", name: "Liam K." },
+      { quote: "Discharge instructions were simple, and follow-up was on time.", name: "Sofia M." },
+      { quote: "Billing and insurance questions were answered in one call.", name: "Caleb R." },
+      { quote: "Imaging was fast, and results were explained the same day.", name: "Harper L." },
+      { quote: "The pediatric team kept my kid relaxed the entire visit.", name: "Jordan S." },
+      { quote: "Clean rooms, calm staff, and clear next steps after surgery.", name: "Aisha T." },
     ],
 
     whyPoints: [
