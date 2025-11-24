@@ -18,7 +18,6 @@ const DoctorsPage = () => {
   const experience = t("doctorsPage.experienceSample", { returnObjects: true }) as string[];
   const specializations = t("doctorsPage.specializationsSample", { returnObjects: true }) as string[];
   const achievements = t("doctorsPage.achievementsSample", { returnObjects: true }) as string[];
-  const [carouselIndex, setCarouselIndex] = useState(0);
   const [activeDoctor, setActiveDoctor] = useState<null | typeof doctors[0]>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const palettes = useMemo(
@@ -38,17 +37,6 @@ const DoctorsPage = () => {
       ["Tue 10-4", "Thu 9-2", "Sat 10-1"],
       ["Mon 2-6", "Wed 9-1", "Thu 1-5"],
       ["Tue 9-3", "Fri 10-4", "Sat 9-12"],
-    ],
-    []
-  );
-  const doctorImages = useMemo(
-    () => [
-      "https://images.unsplash.com/photo-1550831107-1553da8c8464?auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1550831105-5c9180d7489a?auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1550831106-00e4cde4a28b?auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1526256262350-7da7584cf5eb?auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1527613426441-4da17471b66d?auto=format&fit=crop&w=1000&q=80",
-      "https://images.unsplash.com/photo-1537368910025-700350fe46c7?auto=format&fit=crop&w=1000&q=80",
     ],
     []
   );
@@ -166,7 +154,6 @@ const DoctorsPage = () => {
 
           <div className="space-y-10">
             {doctors.map((doc, idx) => {
-              const heroImage = doctorImages[idx % doctorImages.length];
               const profile = doctorProfiles[idx];
               return (
                 <section
@@ -254,11 +241,6 @@ const DoctorsPage = () => {
                         </div>
                         <div
                           className="h-full min-h-[360px] w-full bg-slate-100 lg:min-h-[480px]"
-                          style={{
-                            backgroundImage: `url(${heroImage})`,
-                            backgroundSize: "cover",
-                            backgroundPosition: "center",
-                          }}
                           role="img"
                           aria-label={`${doc.name} portrait`}
                         />
@@ -282,66 +264,6 @@ const DoctorsPage = () => {
           </div>
         </div>
 
-        {/* Doctor highlight anchored to bottom for all breakpoints */}
-        <div className="mt-auto rounded-3xl bg-blue-900 p-5 text-white shadow-lg ring-1 ring-blue-800">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-blue-100">{t("doctorsPage.title")}</p>
-              <h2 className="text-xl font-bold">Our doctors</h2>
-            </div>
-            <div className="flex gap-2 text-xs font-semibold">
-              <button
-                type="button"
-                onClick={() => setCarouselIndex((prev) => (prev - 1 + doctors.length) % doctors.length)}
-                className="rounded-full border border-white/40 px-3 py-1 hover:bg-white/10"
-              >
-                Prev
-              </button>
-              <button
-                type="button"
-                onClick={() => setCarouselIndex((prev) => (prev + 1) % doctors.length)}
-                className="rounded-full border border-white/40 px-3 py-1 hover:bg-white/10"
-              >
-                Next
-              </button>
-            </div>
-          </div>
-          <div className="mt-4 space-y-3 rounded-2xl bg-white/10 p-4 ring-1 ring-white/15">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-lg font-semibold text-white">{doctors[carouselIndex]?.name}</p>
-                <p className="text-sm text-blue-100">{doctors[carouselIndex]?.role}</p>
-              </div>
-              <p className="text-[11px] uppercase text-blue-100">Updated {formattedDates[carouselIndex]}</p>
-            </div>
-            <p className="text-sm text-white/90">{doctors[carouselIndex]?.note}</p>
-            <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-100">
-                {t("doctorsPage.achievementsLabel")}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {achievements.map((item) => (
-                  <span key={`${doctors[carouselIndex]?.name}-${item}`} className="rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold text-white">
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div className="space-y-2">
-              <p className="text-[11px] font-semibold uppercase tracking-wide text-blue-100">
-                {t("doctorsPage.specializationsLabel")}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {specializations.map((item) => (
-                  <span key={`${doctors[carouselIndex]?.name}-${item}`} className="rounded-full bg-white/15 px-3 py-1 text-[11px] font-semibold text-white">
-                    {item}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-        </div>
-
         {activeDoctor && (
           <DoctorProfileModal
             doctor={activeDoctor}
@@ -351,7 +273,9 @@ const DoctorsPage = () => {
             education={education}
             experience={experience}
             specializations={specializations}
-            updatedLabel={formattedDates[carouselIndex]}
+            updatedLabel={
+              formattedDates[doctors.findIndex((d) => d.name === activeDoctor.name)] ?? formattedDates[0]
+            }
           />
         )}
 
