@@ -21,8 +21,8 @@ type AppointmentForm = {
   policy?: string;
   doctor: string;
   urgency: string;
-  preferredDate: string;   // 👈 must exist if you use register("preferredDate")
-  preferredTime: string;   // 👈 must exist if you use register("preferredTime")
+  preferredDate: string;
+  preferredTime: string;
   reason: string;
   notes?: string;
   idUpload: FileList;
@@ -55,16 +55,21 @@ const AppointmentsPage = () => {
   const [searchParams] = useSearchParams();
   const { selectedDoctor, setSelectedDoctor } = useDoctorSelection();
   const [doctorValue, setDoctorValue] = useState(selectedDoctor);
+  const fieldBorder = (hasError: boolean) =>
+    hasError
+      ? "border-2 border-red-500 ring-2 ring-red-200 shadow-[0_10px_35px_-25px_rgba(220,38,38,0.5)]"
+      : "border border-transparent ring-1 ring-slate-200/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_18px_38px_-28px_rgba(15,23,42,0.35)] focus:border-slate-900 focus:ring-2 focus:ring-slate-200";
+  const controlClass = (hasError: boolean) =>
+    `w-full h-14 sm:h-14 rounded-2xl bg-gradient-to-r from-white via-white to-slate-50 px-4 py-3 text-base sm:text-lg transition focus:-translate-y-[1px] ${fieldBorder(hasError)}`;
 
   useEffect(() => {
     const docFromQuery = searchParams.get("doctor");
-    if (docFromQuery) {
-      setDoctorValue(docFromQuery);
-      setSelectedDoctor(docFromQuery);
-    } else {
-      setDoctorValue(selectedDoctor);
-    }
-  }, [searchParams, selectedDoctor, setSelectedDoctor]);
+    const nextValue = docFromQuery ?? selectedDoctor;
+    if (nextValue === doctorValue) return;
+    setDoctorValue(nextValue);
+    setSelectedDoctor(nextValue);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, selectedDoctor]);
 
   return (
     <div className="appointments-shell bg-gradient-to-b from-blue-50 via-white to-blue-50 text-slate-900">
@@ -77,51 +82,41 @@ const AppointmentsPage = () => {
 
  
         <form
-  className="space-y-5 rounded-3xl bg-white p-4 shadow-lg ring-1 ring-slate-100 sm:p-6"
-  onSubmit={handleSubmit(onSubmit)}>
+          className="space-y-5 rounded-3xl bg-white/85 p-4 shadow-xl ring-1 ring-slate-200 backdrop-blur sm:p-6"
+          onSubmit={handleSubmit(onSubmit)}>
           <div className="grid gap-5 md:grid-cols-2">
-          <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
+  <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
   {t("appointments.name")}
   <input
     type="text"
-    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
+    className={controlClass(!!errors.name)}
     {...register("name", {
       required: t("appointments.errors.required"),
     })}
   />
-  {errors.name && (
-    <span className="text-sm text-red-700">
-      {errors.name.message}
-    </span>
-  )}
 </label>
 
 <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
   {t("appointments.fatherName", { defaultValue: "Father name" })}
   <input
     type="text"
-    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
+    className={controlClass(!!errors.fatherName)}
     {...register("fatherName", {
       required: t("appointments.errors.fatherName", {
         defaultValue: "Please enter the father name",
       }),
     })}
   />
-  {errors.fatherName && (
-    <span className="text-sm text-red-700">
-      {errors.fatherName.message}
-    </span>
-  )}
 </label>
 
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
-          <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
+  <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
   {t("appointments.email")}
   <input
     type="email"
-    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
+    className={controlClass(!!errors.email)}
     placeholder="you@example.com"
     {...register("email", {
       required: t("appointments.errors.email"),
@@ -131,37 +126,27 @@ const AppointmentsPage = () => {
       },
     })}
   />
-  {errors.email && (
-    <span className="text-sm text-red-700">
-      {errors.email.message}
-    </span>
-  )}
 </label>
 
-<label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
+  <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
   {t("appointments.motherName", { defaultValue: "Mother name" })}
   <input
     type="text"
-    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
+    className={controlClass(!!errors.motherName)}
     {...register("motherName", {
       required: t("appointments.errors.motherName", {
         defaultValue: "Please enter the mother name",
       }),
     })}
   />
-  {errors.motherName && (
-    <span className="text-sm text-red-700">
-      {errors.motherName.message}
-    </span>
-  )}
 </label>
 
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
-          <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
+  <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
   {t("appointments.phone")}
-  <div className="flex items-center gap-2 rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:py-3 sm:text-lg">
+  <div className={`flex items-center gap-2 ${controlClass(!!errors.phone)}`}>
     <span className="rounded-xl bg-slate-100 px-3 py-2 text-sm font-semibold text-slate-700 select-none">
       +961
     </span>
@@ -175,22 +160,17 @@ const AppointmentsPage = () => {
         required: t("appointments.errors.phone"),
         pattern: {
           value: /^[0-9]{8}$/,
-          message: t("appointments.errors.phone"),
-        },
-      })}
-    />
+        message: t("appointments.errors.phone"),
+      },
+    })}
+  />
   </div>
-  {errors.phone && (
-    <span className="text-sm text-red-700">
-      {errors.phone.message}
-    </span>
-  )}
 </label>
 
 <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
   {t("appointments.department")}
   <select
-    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
+    className={controlClass(!!errors.department)}
     {...register("department", {
       required: t("appointments.errors.department"),
     })}
@@ -205,81 +185,8 @@ const AppointmentsPage = () => {
       <option key={dept}>{dept}</option>
     ))}
   </select>
-  {errors.department && (
-    <span className="text-sm text-red-700">
-      {errors.department.message}
-    </span>
-  )}
 </label>
 
-          </div>
-
-          <div className="grid gap-5 md:grid-cols-2">
-          <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
-  {t("appointments.age", { defaultValue: "Age" })}
-  <input
-    type="text"
-    inputMode="numeric"
-    maxLength={2}
-    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
-    placeholder="30"
-    {...register("age", {
-      required: t("appointments.errors.age", { defaultValue: "Please enter a valid age" }),
-      pattern: {
-        value: /^[0-9]{1,2}$/,
-        message: t("appointments.errors.age", { defaultValue: "Please enter a valid age" }),
-      },
-    })}
-  />
-  {errors.age && (
-    <span className="text-sm text-red-700">
-      {errors.age.message}
-    </span>
-  )}
-</label>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-            <select
-  className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
-  {...register("gender", {
-    required: t("appointments.errors.gender", { defaultValue: "Please select gender" }),
-  })}
->
-  <option value="">
-    {t("appointments.gender", { defaultValue: "Gender" })}
-  </option>
-  {genders.map((g) => (
-    <option key={g}>{g}</option>
-  ))}
-</select>
-{errors.gender && (
-  <span className="text-sm text-red-700">
-    {errors.gender.message}
-  </span>
-)}
-
-<select
-  className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
-  {...register("bloodType", {
-    required: t("appointments.errors.bloodType", {
-      defaultValue: "Please select blood type",
-    }),
-  })}
->
-  <option value="">
-    {t("appointments.bloodType", { defaultValue: "Blood type" })}
-  </option>
-  {bloodTypes.map((b) => (
-    <option key={b}>{b}</option>
-  ))}
-</select>
-{errors.bloodType && (
-  <span className="text-sm text-red-700">
-    {errors.bloodType.message}
-  </span>
-)}
-
-            </div>
           </div>
 
           <div className="grid gap-5 md:grid-cols-2">
@@ -287,24 +194,19 @@ const AppointmentsPage = () => {
       {t("appointments.dob", { defaultValue: "Date of birth" })}
       <input
         type="date"
-        className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
+        className={controlClass(!!errors.dob)}
         {...register("dob", {
           required: t("appointments.errors.dob", {
             defaultValue: "Please enter date of birth",
           }),
         })}
       />
-      {errors.dob && (
-        <span className="text-sm text-red-700">
-          {errors.dob.message}
-        </span>
-      )}
     </label>
             <div className="grid gap-5 sm:grid-cols-2">
             <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
         {t("appointments.patientStatus", { defaultValue: "Patient status" })}
         <select
-          className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
+          className={controlClass(!!errors.patientStatus)}
           {...register("patientStatus", {
             required: t("appointments.errors.patientStatus", {
               defaultValue: "Please select patient status",
@@ -323,11 +225,22 @@ const AppointmentsPage = () => {
             })}
           </option>
         </select>
-        {errors.patientStatus && (
-          <span className="text-sm text-red-700">
-            {errors.patientStatus.message}
-          </span>
-        )}
+      </label>
+      <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
+        {t("appointments.bloodType", { defaultValue: "Blood type" })}
+        <select
+          className={controlClass(!!errors.bloodType)}
+          {...register("bloodType", {
+            required: t("appointments.errors.bloodType", {
+              defaultValue: "Please select blood type",
+            }),
+          })}
+        >
+          <option value="">{t("appointments.bloodType", { defaultValue: "Blood type" })}</option>
+          {bloodTypes.map((b) => (
+            <option key={b}>{b}</option>
+          ))}
+        </select>
       </label>
             </div>
           </div>
@@ -337,19 +250,19 @@ const AppointmentsPage = () => {
       {t("appointments.insurance", { defaultValue: "Insurance provider" })}
       <input
         type="text"
-        className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
+        className={controlClass(false)}
         placeholder={t("appointments.insurancePlaceholder", {
           defaultValue: "Provider name",
         })}
         {...register("insurance")}
       />
-      {/* optional field – no error needed unless you want it */}
+      {/* optional field - no error needed unless you want it */}
     </label>
     <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
       {t("appointments.policy", { defaultValue: "Policy number" })}
       <input
         type="text"
-        className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
+        className={controlClass(false)}
         placeholder={t("appointments.policyPlaceholder", {
           defaultValue: "Policy / ID",
         })}
@@ -361,11 +274,11 @@ const AppointmentsPage = () => {
 
           <div className="grid gap-5 md:grid-cols-2">
           <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
-      {t("appointments.doctor")}
-      <select
-        className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
-        {...register("doctor", {
-          required: t("appointments.errors.doctor"),
+          {t("appointments.doctor")}
+          <select
+            className={controlClass(!!errors.doctor)}
+            {...register("doctor", {
+              required: t("appointments.errors.doctor"),
         })}
       >
         <option value="">{t("appointments.doctor")}</option>
@@ -373,18 +286,13 @@ const AppointmentsPage = () => {
           <option key={doc.name}>{doc.name}</option>
         ))}
       </select>
-      {errors.doctor && (
-        <span className="text-sm text-red-700">
-          {errors.doctor.message}
-        </span>
-      )}
     </label>
     <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
-      {t("appointments.urgency", { defaultValue: "Case urgency" })}
-      <select
-        className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
-        {...register("urgency", {
-          required: t("appointments.errors.urgency", {
+          {t("appointments.urgency", { defaultValue: "Case urgency" })}
+          <select
+            className={controlClass(!!errors.urgency)}
+            {...register("urgency", {
+              required: t("appointments.errors.urgency", {
             defaultValue: "Please choose urgency",
           }),
         })}
@@ -398,45 +306,64 @@ const AppointmentsPage = () => {
           <option key={level}>{level}</option>
         ))}
       </select>
-      {errors.urgency && (
-        <span className="text-sm text-red-700">
-          {errors.urgency.message}
-        </span>
-      )}
     </label>
-    <div className="grid gap-5 sm:grid-cols-2">
-      <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
-        {t("appointments.date")}
-        <input
-          type="date"
-          className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
-          {...register("preferredDate", {
-            required: t("appointments.errors.date"),
-          })}
-        />
-        {errors.preferredDate && (
-          <span className="text-sm text-red-700">
-            {errors.preferredDate.message}
-          </span>
-        )}
-      </label>
+  </div>
 
-      <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
-        {t("appointments.time")}
-        <input
-          type="time"
-          className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
-          {...register("preferredTime", {
-            required: t("appointments.errors.time"),
-          })}
-        />
-        {errors.preferredTime && (
-          <span className="text-sm text-red-700">
-            {errors.preferredTime.message}
-          </span>
-        )}
-      </label>
-    </div>
+  <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+    <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
+      {t("appointments.age", { defaultValue: "Age" })}
+      <input
+        type="text"
+        inputMode="numeric"
+        maxLength={2}
+        className={controlClass(!!errors.age)}
+        placeholder="30"
+        {...register("age", {
+          required: t("appointments.errors.age", { defaultValue: "Please enter a valid age" }),
+          pattern: {
+            value: /^[0-9]{1,2}$/,
+            message: t("appointments.errors.age", { defaultValue: "Please enter a valid age" }),
+          },
+        })}
+      />
+    </label>
+
+    <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
+      {t("appointments.gender", { defaultValue: "Gender" })}
+      <select
+        className={controlClass(!!errors.gender)}
+        {...register("gender", {
+          required: t("appointments.errors.gender", { defaultValue: "Please select gender" }),
+        })}
+      >
+        <option value="">{t("appointments.gender", { defaultValue: "Gender" })}</option>
+        {genders.map((g) => (
+          <option key={g}>{g}</option>
+        ))}
+      </select>
+    </label>
+
+    <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
+      {t("appointments.date")}
+      <input
+        type="date"
+        className={controlClass(!!errors.preferredDate)}
+        {...register("preferredDate", {
+          required: t("appointments.errors.date"),
+        })}
+      />
+    </label>
+
+    <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
+      {t("appointments.time")}
+      <input
+        type="time"
+        className={controlClass(!!errors.preferredTime)}
+        {...register("preferredTime", {
+          required: t("appointments.errors.time"),
+        })}
+      />
+    </label>
   </div>
 
   {/* Reason */}
@@ -444,17 +371,12 @@ const AppointmentsPage = () => {
     {t("appointments.reason")}
     <textarea
       rows={3}
-      className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg"
+      className={`w-full rounded-2xl bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg ${fieldBorder(!!errors.reason)}`}
       placeholder={t("appointments.reasonExample")}
       {...register("reason", {
         required: t("appointments.errors.reason"),
       })}
     />
-    {errors.reason && (
-      <span className="text-sm text-red-700">
-        {errors.reason.message}
-      </span>
-    )}
   </label>
 
   {/* Notes (optional) */}
@@ -476,18 +398,13 @@ const AppointmentsPage = () => {
     <input
       type="file"
       accept="application/pdf"
-      className="w-full rounded-2xl border border-dashed border-slate-300 bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg file:mr-4 file:rounded-lg file:border-0 file:bg-blue-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-800"
+      className={`w-full h-14 sm:h-14 rounded-2xl border border-dashed bg-white px-3 py-2 text-base sm:px-4 sm:py-3 sm:text-lg file:mr-4 file:rounded-lg file:border-0 file:bg-blue-900 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-blue-800 ${fieldBorder(!!errors.idUpload)}`}
       {...register("idUpload", {
         required: t("appointments.errors.idUpload", {
           defaultValue: "Please upload a PDF of your ID or passport",
         }),
       })}
     />
-    {errors.idUpload && (
-      <span className="text-sm text-red-700">
-        {errors.idUpload.message}
-      </span>
-    )}
   </label>
 
   {/* Buttons */}

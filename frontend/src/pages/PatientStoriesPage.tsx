@@ -9,29 +9,44 @@ const PatientStoriesPage = () => {
   useScrollReveal();
 
   return (
-    <div className="bg-white text-slate-900">
+    <div className="bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900">
       <div className="mx-auto w-full max-w-6xl px-4 py-12 space-y-10">
-        <div className="rounded-3xl bg-gradient-to-r from-blue-900 to-blue-700 px-6 py-10 text-white shadow-lg">
-          <h1 className="text-4xl font-bold">{t("home.testimonialsTitle")}</h1>
-          <p className="mt-3 text-lg text-blue-100">{t("home.testimonialsSubtitle")}</p>
-          <button
-            type="button"
-            onClick={() => setIsAdding(true)}
-            className="mt-4 inline-flex rounded-full bg-white/10 px-4 py-2 text-sm font-semibold text-white ring-1 ring-white/50 transition hover:-translate-y-0.5 hover:bg-white/15"
-          >
-            Add your review
-          </button>
+        <div className="relative overflow-hidden rounded-3xl bg-white/80 px-6 py-10 shadow-2xl ring-1 ring-slate-200 backdrop-blur">
+          <div className="pointer-events-none absolute -left-16 top-6 h-48 w-48 rounded-full bg-sky-200/50 blur-3xl" />
+          <div className="pointer-events-none absolute right-4 -bottom-10 h-52 w-52 rounded-full bg-blue-100/60 blur-3xl" />
+          <div className="relative">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">{t("home.testimonialsTitle")}</p>
+            <h1 className="mt-2 text-3xl font-black leading-tight sm:text-4xl">{t("home.testimonialsSubtitle")}</h1>
+            <p className="mt-3 max-w-2xl text-base text-slate-700">
+              Voices from patients, families, and caregivers—curated for honesty and clarity.
+            </p>
+            <div className="mt-4 flex flex-wrap items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setIsAdding(true)}
+                className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-lg transition hover:-translate-y-0.5 hover:bg-slate-800"
+              >
+                Add your review
+                <span aria-hidden="true" className="text-base">
+                  &#8594;
+                </span>
+              </button>
+              <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+                Verified visits only
+              </span>
+            </div>
+          </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-5 md:grid-cols-2">
           {testimonials.map((story) => (
             <div
               key={story.name}
-              className="flex h-full flex-col gap-3 rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100 hover-lift scroll-reveal"
+              className="flex h-full flex-col gap-3 rounded-3xl bg-white/90 p-5 shadow-xl ring-1 ring-slate-200 backdrop-blur transition hover:-translate-y-1 hover:shadow-2xl scroll-reveal"
             >
-              <p className="text-lg text-slate-800">“{story.quote}”</p>
-              <p className="text-sm font-semibold text-blue-900">{story.name}</p>
-              <div className="text-xs text-slate-500">Patient story</div>
+              <p className="text-lg text-slate-800">"{story.quote}"</p>
+              <p className="text-sm font-semibold text-slate-900">{story.name}</p>
+              <div className="text-xs font-semibold text-slate-500">Patient story</div>
             </div>
           ))}
         </div>
@@ -63,7 +78,7 @@ const PatientStoriesPage = () => {
                   <input
                     required
                     type="text"
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
+                    className="w-full rounded-2xl bg-gradient-to-r from-white via-white to-slate-50 px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base border border-transparent ring-1 ring-slate-200/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_16px_30px_-26px_rgba(15,23,42,0.5)] focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition"
                     placeholder="Your full name"
                   />
                 </label>
@@ -72,7 +87,7 @@ const PatientStoriesPage = () => {
                   <input
                     required
                     type="text"
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
+                    className="w-full rounded-2xl bg-gradient-to-r from-white via-white to-slate-50 px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base border border-transparent ring-1 ring-slate-200/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_16px_30px_-26px_rgba(15,23,42,0.5)] focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition"
                     placeholder="Document number"
                   />
                 </label>
@@ -84,7 +99,7 @@ const PatientStoriesPage = () => {
                   <input
                     required
                     type="date"
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
+                    className="w-full rounded-2xl bg-gradient-to-r from-white via-white to-slate-50 px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base border border-transparent ring-1 ring-slate-200/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_16px_30px_-26px_rgba(15,23,42,0.5)] focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition"
                   />
                 </label>
                 <label className="flex flex-col gap-2 text-sm font-semibold text-slate-900">
@@ -92,7 +107,7 @@ const PatientStoriesPage = () => {
                   <input
                     required
                     type="text"
-                    className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
+                    className="w-full rounded-2xl bg-gradient-to-r from-white via-white to-slate-50 px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base border border-transparent ring-1 ring-slate-200/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_16px_30px_-26px_rgba(15,23,42,0.5)] focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition"
                     placeholder="e.g., Cardiology - Dr. Ava Thompson"
                   />
                 </label>
@@ -103,7 +118,7 @@ const PatientStoriesPage = () => {
                 <textarea
                   required
                   rows={2}
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
+                  className="w-full rounded-2xl bg-gradient-to-r from-white via-white to-slate-50 px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base border border-transparent ring-1 ring-slate-200/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_16px_30px_-26px_rgba(15,23,42,0.5)] focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition"
                   placeholder="Mention your visit purpose and any reference numbers."
                 />
               </label>
@@ -113,7 +128,7 @@ const PatientStoriesPage = () => {
                 <textarea
                   required
                   rows={3}
-                  className="w-full rounded-2xl border border-slate-300 bg-white px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base"
+                  className="w-full rounded-2xl bg-gradient-to-r from-white via-white to-slate-50 px-3 py-2 text-sm sm:px-4 sm:py-3 sm:text-base border border-transparent ring-1 ring-slate-200/80 shadow-[inset_0_1px_0_rgba(255,255,255,0.7),0_16px_30px_-26px_rgba(15,23,42,0.5)] focus:border-slate-900 focus:ring-2 focus:ring-slate-200 transition"
                   placeholder="Describe your experience and wishes for others."
                 />
               </label>

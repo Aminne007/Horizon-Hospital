@@ -32,7 +32,7 @@ const App = () => {
     <DoctorSelectionProvider>
       <div className="flex min-h-screen w-full flex-col bg-[#f5f7fb] text-slate-900 overflow-x-hidden" dir={i18n.dir()}>
         <Header />
-        <main className="flex-1 w-full">
+        <main className="flex-1 w-full pt-16 sm:pt-20">
           <div className="w-full">
             <Routes>
               <Route path="/" element={<HomePage />} />

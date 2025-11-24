@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useState } from "react";
 import useScrollReveal from "../hooks/useScrollReveal";
@@ -6,7 +6,6 @@ import heroImageOne from "../assets/Hero-title.webp";
 import heroImageTwo from "../assets/Hero-title1.webp";
 import heroImageThree from "../assets/Hero-title2.webp";
 import DoctorProfileModal from "../components/DoctorProfileModal";
-import { useDoctorSelection } from "../context/DoctorSelectionContext";
 
 const HomePage = () => {
   const { t } = useTranslation();
@@ -50,8 +49,6 @@ const HomePage = () => {
   const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
   const [activeDoctorSlide, setActiveDoctorSlide] = useState(0);
   const [isMobileDoctors, setIsMobileDoctors] = useState(false);
-  const navigate = useNavigate();
-  const { setSelectedDoctor } = useDoctorSelection();
   const testimonialsPerPage = 3;
   const testimonialGroups = useMemo(() => {
     const groups: typeof testimonials[] = [];
@@ -72,12 +69,20 @@ const HomePage = () => {
       ),
     [doctors]
   );
-
-  const handleDoctorBook = (name: string) => {
-    setSelectedDoctor(name);
-    navigate(`/appointments?doctor=${encodeURIComponent(name)}`);
-    setIsDoctorModalOpen(false);
-  };
+  const doctorMeta = useMemo(
+    () =>
+      doctors.map((_, idx) => {
+        const rating = (4.8 + (idx % 5) * 0.04).toFixed(2);
+        const response = ["<10m", "<15m", "<20m"][idx % 3];
+        const languages = [
+          ["EN", "AR"],
+          ["EN", "FR"],
+          ["EN", "ES"],
+        ][idx % 3];
+        return { rating, response, languages };
+      }),
+    [doctors]
+  );
 
   const heroSlides = useMemo(
     () => [
@@ -130,9 +135,17 @@ const HomePage = () => {
     const update = () => setIsMobileDoctors(mq.matches);
     update();
     const listener = () => update();
-    mq.addEventListener ? mq.addEventListener("change", listener) : mq.addListener(listener);
+    if (mq.addEventListener) {
+      mq.addEventListener("change", listener);
+    } else {
+      mq.addListener(listener);
+    }
     return () => {
-      mq.removeEventListener ? mq.removeEventListener("change", listener) : mq.removeListener(listener);
+      if (mq.removeEventListener) {
+        mq.removeEventListener("change", listener);
+      } else {
+        mq.removeListener(listener);
+      }
     };
   }, []);
 
@@ -145,9 +158,9 @@ const HomePage = () => {
   }, [isMobileDoctors, prefersReducedMotion, doctors.length]);
 
   return (
-    <div className="bg-white text-slate-900">
+    <div className="bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900">
       {/* HERO */}
-      <section className="relative isolate w-full min-h-[32vh] sm:min-h-[36vh] md:min-h-[38vh] lg:min-h-[46vh] overflow-hidden bg-slate-950 text-white">
+      <section className="relative isolate w-full min-h-[40vh] sm:min-h-[45vh] md:min-h-[50vh] lg:min-h-[58vh] overflow-hidden bg-slate-950 text-white">
         <div className="absolute inset-0" aria-hidden="true">
           {heroSlides.map((slide, idx) => (
             <div
@@ -179,34 +192,21 @@ const HomePage = () => {
 
         <div className="relative mx-auto flex min-h-[18vh] flex-col justify-center px-4 py-3 sm:py-5 md:max-w-5xl lg:max-w-6xl lg:py-7">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-7">
-            <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 px-4 py-4 shadow-2xl backdrop-blur-2xl ring-1 ring-white/25 sm:px-6 sm:py-6 lg:px-8 lg:py-8 animate-soft-fade scroll-reveal">
+            <div className="relative w-full overflow-hidden rounded-3xl border border-white/20 bg-white/10 px-5 py-6 shadow-2xl backdrop-blur-2xl ring-1 ring-white/25 sm:px-7 sm:py-8 lg:px-9 lg:py-10 animate-soft-fade scroll-reveal">
               <div className="pointer-events-none absolute -left-16 -top-16 h-40 w-40 rounded-full bg-blue-400/25 blur-3xl" />
               <div className="pointer-events-none absolute -right-10 top-6 h-28 w-28 rounded-full bg-sky-300/20 blur-3xl" />
               <div className="pointer-events-none absolute -bottom-16 right-10 h-32 w-32 rounded-full bg-cyan-400/15 blur-3xl" />
 
               <p className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.35em] text-blue-100">
-                Trusted Care - Calm Spaces
+                Call for action
               </p>
-              <h1 className="mt-3 text-[clamp(2rem,5vw,3.5rem)] font-black leading-[1.05] sm:mt-4">
+              <h1 className="mt-3 text-[clamp(2.2rem,5.6vw,4rem)] font-black leading-[1.02] sm:mt-4">
                 {t("common.hospitalName")}
               </h1>
               <p className="mt-4 max-w-2xl text-[clamp(1rem,2.6vw,1.25rem)] text-blue-50/90">
-                Premium diagnostics, surgical suites, and attentive teams guiding every visit with clarity and calm.
+                Book your visit or talk to our care team now?same-day diagnostics, attentive specialists, and calm spaces designed around you.
               </p>
-              <div className="mt-6 flex flex-wrap gap-3">
-                <Link
-                  to="/appointments"
-                  className="inline-flex items-center justify-center rounded-full bg-white/90 px-4 py-3 text-sm font-semibold text-slate-900 shadow-lg ring-1 ring-white/40 transition hover:-translate-y-0.5 hover:bg-white focus-visible:outline-white sm:px-5 sm:text-base lg:px-6 lg:text-lg"
-                >
-                  {t("home.ctaPrimary")}
-                </Link>
-                <Link
-                  to="/doctors"
-                  className="inline-flex items-center justify-center rounded-full border border-white/40 bg-white/10 px-4 py-3 text-sm font-semibold text-white shadow-inner backdrop-blur transition hover:-translate-y-0.5 hover:border-white/70 hover:bg-white/20 focus-visible:outline-white sm:px-5 sm:text-base lg:px-6 lg:text-lg"
-                >
-                  {t("common.nav.doctors")}
-                </Link>
-              </div>
+             
             </div>
 
             <div className="hidden w-full grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 shadow-lg backdrop-blur min-[1071px]:grid lg:max-w-xs">
@@ -290,15 +290,6 @@ const HomePage = () => {
                         >
                           {t("common.learnMore", { defaultValue: "View Profile" })}
                         </button>
-                        <button
-                          type="button"
-                          className="inline-flex items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
-                          onClick={() => {
-                            handleDoctorBook(doc.name);
-                          }}
-                        >
-                          {t("common.bookNow")}
-                        </button>
                       </div>
                     </div>
                   </div>
@@ -318,11 +309,15 @@ const HomePage = () => {
             </div>
           ) : (
             <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
-              {doctors.map((doc) => (
+              {doctors.map((doc, idx) => {
+                const meta = doctorMeta[idx];
+                return (
                 <div
                   key={doc.name}
-                  className="rounded-3xl bg-white p-5 shadow-[0_10px_45px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-100 hover:-translate-y-1 hover:shadow-[0_16px_60px_-18px_rgba(15,23,42,0.35)] transition"
+                  className="relative overflow-hidden rounded-3xl bg-white/90 p-5 shadow-[0_10px_45px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-200 backdrop-blur transition hover:-translate-y-1 hover:shadow-[0_20px_70px_-24px_rgba(15,23,42,0.4)]"
                 >
+                  <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-80" />
+                  <div className="relative">
                   <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
                     <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-900">Featured</span>
                     <span className="text-blue-500">24/7 care</span>
@@ -333,6 +328,11 @@ const HomePage = () => {
                   <p className="mt-3 text-lg font-bold text-slate-900 sm:text-xl">{doc.name}</p>
                   <p className="text-sm font-semibold text-blue-900 sm:text-base">{doc.role}</p>
                   <p className="mt-2 text-sm text-slate-700 sm:text-base">{doc.note}</p>
+                  <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+                    <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Rating {meta.rating}</span>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Response {meta.response}</span>
+                    <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Languages: {meta.languages.join(", ")}</span>
+                  </div>
                   <div className="mt-4 grid gap-2 sm:grid-cols-2">
                     <button
                       type="button"
@@ -344,19 +344,11 @@ const HomePage = () => {
                     >
                       {t("common.learnMore", { defaultValue: "View Profile" })}
                     </button>
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center rounded-2xl bg-blue-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 sm:text-base"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        handleDoctorBook(doc.name);
-                      }}
-                    >
-                      {t("common.bookNow")}
-                    </button>
+                  </div>
                   </div>
                 </div>
-              ))}
+              );
+            })}
             </div>
           )}
         </div>
@@ -380,21 +372,22 @@ const HomePage = () => {
             <Link
               key={service.title}
               to={`/services/${service.title.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/(^-|-$)/g, "")}`}
-              className="group rounded-3xl bg-white/90 p-5 shadow-[0_12px_40px_-18px_rgba(15,23,42,0.25)] ring-1 ring-slate-100 transition hover:-translate-y-1 hover:shadow-[0_18px_50px_-16px_rgba(15,23,42,0.28)] scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
+              className="group relative overflow-hidden rounded-3xl bg-white/90 p-5 shadow-[0_12px_40px_-18px_rgba(15,23,42,0.25)] ring-1 ring-slate-200 backdrop-blur transition hover:-translate-y-1 hover:shadow-[0_18px_50px_-16px_rgba(15,23,42,0.28)] scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
             >
-              <div className="flex items-center justify-between gap-3">
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-80" />
+              <div className="relative flex items-center justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-50 text-xl sm:text-2xl transition duration-200 group-hover:scale-110">
+                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-xl text-white shadow-inner transition duration-200 group-hover:scale-105">
                     {service.icon}
                   </span>
-                  <p className="text-lg font-semibold text-slate-900 sm:text-xl">{service.title}</p>
+                  <div>
+                    <p className="text-lg font-semibold text-slate-900 sm:text-xl">{service.title}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">24/7 access</p>
+                  </div>
                 </div>
-                <span className="text-xs font-semibold uppercase tracking-[0.22em] text-blue-600">
-                  24/7
-                </span>
               </div>
-              <p className="mt-3 text-sm text-slate-700 sm:text-base">{service.desc}</p>
-              <div className="mt-4 rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-500 transition duration-200 group-hover:bg-slate-100">
+              <p className="relative mt-3 text-sm text-slate-700 sm:text-base">{service.desc}</p>
+              <div className="relative mt-4 rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-500 ring-1 ring-slate-100 transition duration-200 group-hover:bg-slate-100">
                 {placeholders.serviceImage}
               </div>
             </Link>
@@ -403,21 +396,21 @@ const HomePage = () => {
       </section>
 
       {/* FEATURED DEPARTMENTS */}
-      <section className="bg-slate-900 py-10 sm:py-12 text-white">
+      <section className="bg-gradient-to-b from-white via-slate-50 to-white py-10 sm:py-12 text-slate-900">
         <div className="w-full px-3 sm:px-4">
           <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.35em] text-sky-200 sm:text-sm">
+            <div className="space-y-1">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500 sm:text-xs">
                 Departments
               </p>
-              <h2 className="text-2xl font-bold sm:text-3xl">{t("home.departmentsTitle")}</h2>
-              <p className="mt-1 text-sm text-slate-200/80 sm:text-base">
+              <h2 className="text-2xl font-black sm:text-3xl">{t("home.departmentsTitle")}</h2>
+              <p className="text-sm text-slate-600 sm:text-base">
                 Coordinated teams across diagnostics, surgery, rehab, and beyond.
               </p>
             </div>
             <Link
               to="/departments"
-              className="inline-flex items-center justify-center rounded-full border border-white/30 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:border-white/60 sm:text-base"
+              className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 sm:text-base"
             >
               {t("common.nav.departments")}
             </Link>
@@ -427,16 +420,21 @@ const HomePage = () => {
               <Link
                 key={dept}
                 to={`/departments/${dept.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/(^-|-$)/g, "")}`}
-                className="group rounded-2xl bg-white/5 p-4 shadow-[0_10px_45px_-20px_rgba(0,0,0,0.35)] ring-1 ring-white/10 transition hover:-translate-y-1 hover:bg-white/10 hover:ring-white/30 scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sky-300/60"
+                className="group relative overflow-hidden rounded-2xl bg-white p-4 shadow-[0_10px_45px_-20px_rgba(15,23,42,0.2)] ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-[0_16px_60px_-22px_rgba(15,23,42,0.25)] hover:ring-slate-300 scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-300/80"
               >
-                <div className="flex items-center justify-between">
-                  <p className="text-base font-semibold text-white transition duration-200 group-hover:text-sky-100 sm:text-lg">
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-90" />
+                <div className="relative flex items-center justify-between">
+                  <p className="text-base font-semibold text-slate-900 transition duration-200 group-hover:text-slate-700 sm:text-lg">
                     {dept}
                   </p>
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-200">Care</span>
+                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Care</span>
                 </div>
-                <div className="mt-3 h-24 rounded-xl bg-slate-800/60 text-center text-sm text-slate-200 transition duration-200 group-hover:bg-slate-800">
+                <div className="relative mt-3 h-24 rounded-xl bg-slate-100 text-center text-sm text-slate-500 ring-1 ring-slate-200 transition duration-200 group-hover:bg-slate-200">
                   {placeholders.departmentImage}
+                </div>
+                <div className="relative mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
+                  <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Multidisciplinary</span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">24/7 coverage</span>
                 </div>
               </Link>
             ))}
@@ -445,32 +443,38 @@ const HomePage = () => {
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="bg-gradient-to-r from-blue-900 to-blue-700 py-4 sm:py-6 text-white">
-        <div className="mx-auto grid w-full gap-2 sm:gap-3 px-3 sm:px-4 md:grid-cols-3">
-          <div className="md:col-span-1">
-            <h3 className="text-base sm:text-xl md:text-2xl font-bold">
-              {t("home.testimonialsTitle")}
+      <section className="relative isolate bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 py-6 sm:py-8 text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.08),transparent_35%),radial-gradient(circle_at_78%_32%,rgba(255,255,255,0.07),transparent_32%),radial-gradient(circle_at_42%_78%,rgba(59,130,246,0.16),transparent_36%)]" />
+        <div className="mx-auto grid w-full max-w-6xl gap-4 px-4 sm:gap-5 sm:px-6 md:grid-cols-3">
+          <div className="md:col-span-1 space-y-2">
+            <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-200">Voices from our patients</p>
+            <h3 className="text-xl sm:text-2xl md:text-3xl font-black">
+              Premium care, real stories.
             </h3>
-            <p className="mt-2 text-xs sm:text-sm md:text-base text-blue-100">
-              {t("home.testimonialsSubtitle")}
+            <p className="text-sm text-blue-100">
+              Calm spaces, clear updates, attentive teams—told by patients.
             </p>
           </div>
 
           <div className="md:col-span-2 grid gap-3 sm:gap-4">
-            <div className="overflow-hidden rounded-2xl bg-white/10 p-2 sm:p-3 md:p-4 shadow-lg ring-1 ring-white/10">
+            <div className="overflow-hidden rounded-3xl bg-white/10 p-3 sm:p-4 shadow-2xl ring-1 ring-white/10 backdrop-blur">
               <div
-                className="flex transition-transform duration-700 ease-in-out"
+                className="flex transition-transform duration-700 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
                 style={{ transform: `translateX(-${activeTestimonialGroupSafe * 100}%)` }}
               >
                 {testimonialGroups.map((group, groupIdx) => (
                   <div
                     key={groupIdx}
-                    className="grid min-w-full grid-cols-1 sm:grid-cols-3 gap-2 sm:gap-3 px-1"
+                    className="grid min-w-full grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4 px-1 transition-all duration-500 ease-out"
+                    style={{
+                      opacity: groupIdx === activeTestimonialGroupSafe ? 1 : 0.35,
+                      transform: groupIdx === activeTestimonialGroupSafe ? "scale(1)" : "scale(0.96)",
+                    }}
                   >
                     {group.map((story, idx) => (
                       <div
                         key={`${story.name}-${idx}`}
-                        className="rounded-2xl bg-white/5 p-2 sm:p-3 md:p-4 shadow-inner ring-1 ring-white/10"
+                        className="rounded-2xl bg-gradient-to-br from-white/12 via-white/8 to-white/5 p-3 sm:p-4 shadow-inner ring-1 ring-white/15"
                       >
                         <p className="text-xs sm:text-sm md:text-base">
                           &ldquo;{story.quote}&rdquo;
@@ -485,15 +489,15 @@ const HomePage = () => {
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 sm:gap-2">
+            <div className="flex items-center gap-2">
               {testimonialGroups.map((_, idx) => (
                 <button
                   key={idx}
                   aria-label={`Go to testimonial group ${idx + 1}`}
                   onClick={() => setActiveTestimonialGroup(idx)}
-                  className={`rounded-full border border-white/70 transition ${
-                    idx === activeTestimonialGroupSafe ? "bg-white" : "bg-transparent"
-                  } h-2 w-2 sm:h-3 sm:w-3`}
+                  className={`h-2 w-2 rounded-full border border-white/70 transition sm:h-2.5 sm:w-2.5 ${
+                    idx === activeTestimonialGroupSafe ? "bg-white shadow" : "bg-transparent"
+                  }`}
                 />
               ))}
             </div>
@@ -507,7 +511,6 @@ const HomePage = () => {
           doctor={activeDoctor}
           isOpen={isDoctorModalOpen}
           onClose={() => setIsDoctorModalOpen(false)}
-          onBook={handleDoctorBook}
           achievements={t("doctorsPage.achievementsSample", { returnObjects: true }) as string[]}
           education={t("doctorsPage.educationSample", { returnObjects: true }) as string[]}
           experience={t("doctorsPage.experienceSample", { returnObjects: true }) as string[]}
