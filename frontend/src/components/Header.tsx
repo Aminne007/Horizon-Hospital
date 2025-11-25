@@ -16,6 +16,7 @@ const Header = () => {
   const navLinks = useMemo(
     () => [
       { label: t("common.nav.home"), path: "/" },
+      { label: t("common.nav.services"), path: "/services" },
       { label: t("common.nav.departments"), path: "/departments" },
       { label: t("common.nav.doctors"), path: "/doctors" },
       { label: t("common.nav.appointments"), path: "/appointments" },

@@ -11,6 +11,7 @@ import DoctorsPage from "./pages/DoctorsPage";
 import HomePage from "./pages/HomePage";
 import PatientStoriesPage from "./pages/PatientStoriesPage";
 import ServiceDetailPage from "./pages/ServiceDetailPage";
+import ServicesPage from "./pages/ServicesPage";
 import { useTranslation } from "react-i18next";
 import { useEffect } from "react";
 import { DoctorSelectionProvider } from "./context/DoctorSelectionContext";
@@ -30,7 +31,10 @@ const App = () => {
 
   return (
     <DoctorSelectionProvider>
-      <div className="flex min-h-screen w-full flex-col bg-[#f5f7fb] text-slate-900 overflow-x-hidden" dir={i18n.dir()}>
+      <div
+        className="flex min-h-screen w-full flex-col bg-gradient-to-b from-white via-slate-50 to-[#e8f2ff] text-slate-900 overflow-x-hidden"
+        dir={i18n.dir()}
+      >
         <Header />
         <main className="flex-1 w-full pt-16 sm:pt-20">
           <div className="w-full">
@@ -43,6 +47,7 @@ const App = () => {
               <Route path="/about" element={<AboutPage />} />
               <Route path="/stories" element={<PatientStoriesPage />} />
               <Route path="/billing" element={<BillingSupportPage />} />
+              <Route path="/services" element={<ServicesPage />} />
               <Route path="/services/:slug" element={<ServiceDetailPage />} />
               <Route path="/departments/:slug" element={<DepartmentDetailPage />} />
               <Route path="*" element={<HomePage />} />

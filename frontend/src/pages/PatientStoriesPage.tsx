@@ -1,6 +1,7 @@
 import { useTranslation } from "react-i18next";
 import { useState } from "react";
 import useScrollReveal from "../hooks/useScrollReveal";
+import PageShell from "../components/PageShell";
 
 const PatientStoriesPage = () => {
   const { t } = useTranslation();
@@ -11,16 +12,14 @@ const PatientStoriesPage = () => {
   return (
     <div className="bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900">
       <div className="mx-auto w-full max-w-6xl px-4 py-12 space-y-10">
-        <div className="relative overflow-hidden rounded-3xl bg-white/80 px-6 py-10 shadow-2xl ring-1 ring-slate-200 backdrop-blur">
-          <div className="pointer-events-none absolute -left-16 top-6 h-48 w-48 rounded-full bg-sky-200/50 blur-3xl" />
-          <div className="pointer-events-none absolute right-4 -bottom-10 h-52 w-52 rounded-full bg-blue-100/60 blur-3xl" />
-          <div className="relative">
-            <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">{t("home.testimonialsTitle")}</p>
-            <h1 className="mt-2 text-3xl font-black leading-tight sm:text-4xl">{t("home.testimonialsSubtitle")}</h1>
-            <p className="mt-3 max-w-2xl text-base text-slate-700">
-              Voices from patients, families, and caregivers—curated for honesty and clarity.
-            </p>
-            <div className="mt-4 flex flex-wrap items-center gap-3">
+        <PageShell
+          title={t("home.testimonialsTitle")}
+          subtitle="Voices from patients, families, and caregivers—curated for honesty and clarity."
+          eyebrow="Stories"
+          kicker="Testimonials"
+          accent="#0ea5e9"
+          actions={
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 type="button"
                 onClick={() => setIsAdding(true)}
@@ -31,25 +30,25 @@ const PatientStoriesPage = () => {
                   &#8594;
                 </span>
               </button>
-              <span className="rounded-full bg-white/70 px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
+              <span className="rounded-full bg-white px-3 py-1 text-xs font-semibold text-slate-700 ring-1 ring-slate-200">
                 Verified visits only
               </span>
             </div>
+          }
+        >
+          <div className="grid gap-5 md:grid-cols-2">
+            {testimonials.map((story) => (
+              <div
+                key={story.name}
+                className="flex h-full flex-col gap-3 rounded-3xl bg-white/90 p-5 shadow-xl ring-1 ring-slate-200 backdrop-blur transition hover:-translate-y-1 hover:shadow-2xl scroll-reveal"
+              >
+                <p className="text-lg text-slate-800">"{story.quote}"</p>
+                <p className="text-sm font-semibold text-slate-900">{story.name}</p>
+                <div className="text-xs font-semibold text-slate-500">Patient story</div>
+              </div>
+            ))}
           </div>
-        </div>
-
-        <div className="grid gap-5 md:grid-cols-2">
-          {testimonials.map((story) => (
-            <div
-              key={story.name}
-              className="flex h-full flex-col gap-3 rounded-3xl bg-white/90 p-5 shadow-xl ring-1 ring-slate-200 backdrop-blur transition hover:-translate-y-1 hover:shadow-2xl scroll-reveal"
-            >
-              <p className="text-lg text-slate-800">"{story.quote}"</p>
-              <p className="text-sm font-semibold text-slate-900">{story.name}</p>
-              <div className="text-xs font-semibold text-slate-500">Patient story</div>
-            </div>
-          ))}
-        </div>
+        </PageShell>
 
       </div>
 

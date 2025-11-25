@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useDoctorSelection } from "../context/DoctorSelectionContext";
 import { useForm } from "react-hook-form";
+import PageShell from "../components/PageShell";
 
 
 type AppointmentForm = {
@@ -73,17 +74,21 @@ const AppointmentsPage = () => {
 
   return (
     <div className="appointments-shell bg-gradient-to-b from-blue-50 via-white to-blue-50 text-slate-900">
-      <div className="w-full mx-auto max-w-4xl px-4 py-8 space-y-6 sm:px-6 sm:py-10">
-        <div className="rounded-3xl bg-white p-5 shadow-lg ring-1 ring-slate-100 sm:p-6">
-          <h1 className="text-3xl font-bold text-slate-900 sm:text-4xl">{t("appointments.title")}</h1>
-          <p className="mt-2 text-base text-slate-700 sm:text-lg">{t("appointments.subtitle")}</p>
-          <p className="mt-1 text-sm font-semibold text-slate-900 sm:text-base">{t("appointments.helper")}</p>
-        </div>
+      <div className="w-full mx-auto max-w-5xl px-4 py-8 space-y-6 sm:px-6 sm:py-10">
+        <PageShell
+          title={t("appointments.title")}
+          subtitle={t("appointments.subtitle")}
+          eyebrow="Appointments"
+          kicker="Book care"
+          accent="#0ea5e9"
+          actions={<span className="rounded-full bg-slate-900 px-3 py-2 text-xs font-semibold text-white shadow-md">Hotline: {t("common.hotlineNumber")}</span>}
+        >
+          <p className="text-sm font-semibold text-slate-900 sm:text-base">{t("appointments.helper")}</p>
 
- 
-        <form
-          className="space-y-5 rounded-3xl bg-white/85 p-4 shadow-xl ring-1 ring-slate-200 backdrop-blur sm:p-6"
-          onSubmit={handleSubmit(onSubmit)}>
+          <form
+            className="space-y-5 rounded-3xl bg-white/90 p-4 shadow-xl ring-1 ring-slate-200 backdrop-blur sm:p-6"
+            onSubmit={handleSubmit(onSubmit)}
+          >
           <div className="grid gap-5 md:grid-cols-2">
   <label className="flex flex-col gap-2 text-base font-semibold text-slate-900">
   {t("appointments.name")}
@@ -423,6 +428,7 @@ const AppointmentsPage = () => {
     </button>
   </div>
         </form>
+        </PageShell>
       </div>
     </div>
   );

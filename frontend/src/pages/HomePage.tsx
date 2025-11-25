@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import useScrollReveal from "../hooks/useScrollReveal";
 import heroImageOne from "../assets/Hero-title.webp";
 import heroImageTwo from "../assets/Hero-title1.webp";
@@ -15,9 +15,13 @@ const HomePage = () => {
     desc: string;
     icon: string;
   }[];
+  const servicesTypingLines = useMemo(() => {
+    const lines = t("home.servicesTypingLines", { returnObjects: true }) as string[] | undefined;
+    return Array.isArray(lines) ? lines.filter(Boolean) : [];
+  }, [t]);
 
   const departments = t("home.departments", { returnObjects: true }) as string[];
-  const featuredDepartments = departments.slice(0, 4);
+  const featuredDepartments = departments.slice(0, 3);
 
   const doctors = t("home.doctors", { returnObjects: true }) as {
     name: string;
@@ -35,6 +39,12 @@ const HomePage = () => {
     name: string;
   }[];
 
+  const slugify = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/gi, "-")
+      .replace(/(^-|-$)/g, "");
+
   const placeholders = t("common.placeholders", {
     returnObjects: true,
   }) as Record<string, string>;
@@ -48,7 +58,22 @@ const HomePage = () => {
   const [activeDoctor, setActiveDoctor] = useState<null | (typeof doctors)[0]>(null);
   const [isDoctorModalOpen, setIsDoctorModalOpen] = useState(false);
   const [activeDoctorSlide, setActiveDoctorSlide] = useState(0);
-  const [isMobileDoctors, setIsMobileDoctors] = useState(false);
+  const [doctorPerView, setDoctorPerView] = useState(3);
+  const [activeServiceSlide, setActiveServiceSlide] = useState(0);
+  const [typingLineIndex, setTypingLineIndex] = useState(0);
+  const [typedServiceLine, setTypedServiceLine] = useState("");
+  const [isDoctorInteracting, setIsDoctorInteracting] = useState(false);
+  const doctorResumeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const doctorDragStartX = useRef<number | null>(null);
+  const doctorPages = useMemo(() => {
+    const size = Math.max(1, doctorPerView);
+    const pages: typeof doctors[] = [];
+    for (let i = 0; i < doctors.length; i += size) {
+      pages.push(doctors.slice(i, i + size));
+    }
+    return pages.length ? pages : [doctors];
+  }, [doctorPerView, doctors]);
+  const totalDoctorPages = doctorPages.length;
   const testimonialsPerPage = 3;
   const testimonialGroups = useMemo(() => {
     const groups: typeof testimonials[] = [];
@@ -59,6 +84,10 @@ const HomePage = () => {
   }, [testimonials]);
   const totalTestimonialGroups = testimonialGroups.length;
   const activeTestimonialGroupSafe = totalTestimonialGroups ? activeTestimonialGroup % totalTestimonialGroups : 0;
+  const moveTestimonialGroup = (delta: number) => {
+    if (!totalTestimonialGroups) return;
+    setActiveTestimonialGroup((prev) => ((prev + delta) % totalTestimonialGroups + totalTestimonialGroups) % totalTestimonialGroups);
+  };
 
   const formattedDates = useMemo(
     () =>
@@ -69,36 +98,21 @@ const HomePage = () => {
       ),
     [doctors]
   );
-  const doctorMeta = useMemo(
-    () =>
-      doctors.map((_, idx) => {
-        const rating = (4.8 + (idx % 5) * 0.04).toFixed(2);
-        const response = ["<10m", "<15m", "<20m"][idx % 3];
-        const languages = [
-          ["EN", "AR"],
-          ["EN", "FR"],
-          ["EN", "ES"],
-        ][idx % 3];
-        return { rating, response, languages };
-      }),
-    [doctors]
-  );
-
   const heroSlides = useMemo(
     () => [
       {
         label: "Hospital exterior and welcome",
-        gradient: "from-slate-950/65 via-blue-900/45 to-sky-900/25",
+        gradient: "from-sky-800/55 via-sky-600/40 to-blue-400/25",
         image: heroImageOne,
       },
       {
         label: "Doctors and comforting care",
-        gradient: "from-slate-950/60 via-slate-900/40 to-blue-800/25",
+        gradient: "from-sky-800/55 via-sky-600/40 to-blue-400/25",
         image: heroImageTwo,
       },
       {
         label: "MRI and surgical suites",
-        gradient: "from-slate-950/60 via-[#0b2f43]/45 to-[#0f4c75]/25",
+        gradient: "from-sky-800/55 via-sky-600/40 to-sky-400/25",
         image: heroImageThree,
       },
     ],
@@ -107,6 +121,8 @@ const HomePage = () => {
 
   const [activeSlide, setActiveSlide] = useState(0);
   const quickStats = stats.slice(0, 3);
+  const activeServiceIndex = services.length ? activeServiceSlide % services.length : 0;
+  const activeDoctorIndex = totalDoctorPages ? activeDoctorSlide % totalDoctorPages : 0;
 
   useScrollReveal();
 
@@ -130,37 +146,119 @@ const HomePage = () => {
   }, [prefersReducedMotion, heroSlides.length]);
 
   useEffect(() => {
-    if (typeof window === "undefined" || !window.matchMedia) return;
-    const mq = window.matchMedia("(max-width: 767px)");
-    const update = () => setIsMobileDoctors(mq.matches);
-    update();
-    const listener = () => update();
-    if (mq.addEventListener) {
-      mq.addEventListener("change", listener);
-    } else {
-      mq.addListener(listener);
-    }
-    return () => {
-      if (mq.removeEventListener) {
-        mq.removeEventListener("change", listener);
-      } else {
-        mq.removeListener(listener);
-      }
-    };
-  }, []);
+    if (prefersReducedMotion || services.length <= 1) return;
+    const id = setInterval(() => {
+      setActiveServiceSlide((prev) => (prev + 1) % services.length);
+    }, 4800);
+    return () => clearInterval(id);
+  }, [prefersReducedMotion, services.length]);
 
   useEffect(() => {
-    if (!isMobileDoctors || prefersReducedMotion || doctors.length <= 1) return;
+    if (prefersReducedMotion || totalDoctorPages <= 1 || isDoctorInteracting) return;
     const id = setInterval(() => {
-      setActiveDoctorSlide((prev) => (prev + 1) % doctors.length);
-    }, 5000);
+      safelySetDoctorSlide(activeDoctorIndex + 1);
+    }, 5200);
     return () => clearInterval(id);
-  }, [isMobileDoctors, prefersReducedMotion, doctors.length]);
+  }, [prefersReducedMotion, totalDoctorPages, isDoctorInteracting, activeDoctorIndex]);
+
+  useEffect(() => {
+    setActiveServiceSlide(0);
+  }, [services.length]);
+
+  useEffect(() => {
+    if (!activeDoctor && doctors.length) {
+      setActiveDoctor(doctors[0]);
+    }
+  }, [activeDoctor, doctors]);
+
+  const safelySetDoctorSlide = (next: number) => {
+    if (!totalDoctorPages) return;
+    setActiveDoctorSlide(((next % totalDoctorPages) + totalDoctorPages) % totalDoctorPages);
+  };
+
+  const beginDoctorInteraction = () => {
+    setIsDoctorInteracting(true);
+    if (doctorResumeTimeout.current) clearTimeout(doctorResumeTimeout.current);
+  };
+
+  const endDoctorInteraction = () => {
+    if (doctorResumeTimeout.current) clearTimeout(doctorResumeTimeout.current);
+    doctorResumeTimeout.current = setTimeout(() => setIsDoctorInteracting(false), 1000);
+  };
+
+  const handleDoctorPointerDown = (clientX: number | null) => {
+    beginDoctorInteraction();
+    doctorDragStartX.current = clientX;
+  };
+
+  const handleDoctorPointerUp = (clientX: number | null) => {
+    const startX = doctorDragStartX.current;
+    doctorDragStartX.current = null;
+    if (startX !== null && clientX !== null) {
+      const delta = clientX - startX;
+      if (Math.abs(delta) > 40) {
+        safelySetDoctorSlide(activeDoctorIndex + (delta > 0 ? -1 : 1));
+      }
+    }
+    endDoctorInteraction();
+  };
+
+  useEffect(() => {
+    const updatePerView = () => {
+      if (typeof window === "undefined") return;
+      const width = window.innerWidth;
+      if (width < 640) setDoctorPerView(1);
+      else if (width < 1024) setDoctorPerView(2);
+      else setDoctorPerView(3);
+    };
+    updatePerView();
+    window.addEventListener("resize", updatePerView);
+    return () => window.removeEventListener("resize", updatePerView);
+  }, []);
+
+  useEffect(
+    () => () => {
+      if (doctorResumeTimeout.current) clearTimeout(doctorResumeTimeout.current);
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (!servicesTypingLines.length) {
+      setTypedServiceLine("");
+      return;
+    }
+    setTypingLineIndex(0);
+    setTypedServiceLine(prefersReducedMotion ? servicesTypingLines[0] : "");
+  }, [servicesTypingLines, prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!servicesTypingLines.length) return;
+    if (prefersReducedMotion) {
+      setTypedServiceLine(servicesTypingLines[typingLineIndex % servicesTypingLines.length]);
+      return;
+    }
+
+    const currentLine = servicesTypingLines[typingLineIndex % servicesTypingLines.length];
+    if (typedServiceLine === currentLine) {
+      const pauseId = setTimeout(() => {
+        setTypedServiceLine("");
+        setTypingLineIndex((prev) => (prev + 1) % servicesTypingLines.length);
+      }, 1600);
+      return () => clearTimeout(pauseId);
+    }
+
+    const typeId = setTimeout(() => {
+      setTypedServiceLine(currentLine.slice(0, typedServiceLine.length + 1));
+    }, 55);
+
+    return () => clearTimeout(typeId);
+  }, [typedServiceLine, typingLineIndex, servicesTypingLines, prefersReducedMotion]);
 
   return (
     <div className="bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900">
       {/* HERO */}
-      <section className="relative isolate w-full min-h-[40vh] sm:min-h-[45vh] md:min-h-[50vh] lg:min-h-[58vh] overflow-hidden bg-slate-950 text-white">
+      <section className="relative isolate w-full min-h-[40vh] sm:min-h-[45vh] md:min-h-[50vh] lg:min-h-[58vh] overflow-hidden bg-sky-900 text-white">
         <div className="absolute inset-0" aria-hidden="true">
           {heroSlides.map((slide, idx) => (
             <div
@@ -176,19 +274,10 @@ const HomePage = () => {
               />
               <div className={`absolute inset-0 bg-gradient-to-br ${slide.gradient}`} />
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_18%_22%,rgba(255,255,255,0.08),transparent_35%),radial-gradient(circle_at_78%_32%,rgba(255,255,255,0.07),transparent_32%),radial-gradient(circle_at_42%_78%,rgba(59,130,246,0.16),transparent_36%)]" />
-              {!slide.image && (
-                <div className="absolute inset-0 flex items-center justify-center text-center text-lg font-semibold text-white/65">
-                  {slide.label}
-                </div>
-              )}
             </div>
           ))}
         </div>
-
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-slate-950/50 to-slate-950/15"
-          aria-hidden="true"
-        />
+        <div className="absolute inset-0 bg-gradient-to-r from-sky-900/60 via-sky-800/45 to-sky-500/18" aria-hidden="true" />
 
         <div className="relative mx-auto flex min-h-[18vh] flex-col justify-center px-4 py-3 sm:py-5 md:max-w-5xl lg:max-w-6xl lg:py-7">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:gap-7">
@@ -206,7 +295,6 @@ const HomePage = () => {
               <p className="mt-4 max-w-2xl text-[clamp(1rem,2.6vw,1.25rem)] text-blue-50/90">
                 Book your visit or talk to our care team now?same-day diagnostics, attentive specialists, and calm spaces designed around you.
               </p>
-             
             </div>
 
             <div className="hidden w-full grid-cols-2 gap-3 rounded-2xl border border-white/10 bg-white/5 p-3 shadow-lg backdrop-blur min-[1071px]:grid lg:max-w-xs">
@@ -230,9 +318,7 @@ const HomePage = () => {
                 onClick={() => setActiveSlide(idx)}
                 aria-label={`Go to slide ${idx + 1}`}
                 aria-pressed={idx === activeSlide}
-                className={`h-3 w-3 rounded-full border border-white/50 transition ${
-                  idx === activeSlide ? "bg-white shadow" : "bg-white/10"
-                }`}
+                className={`h-3 w-3 rounded-full border border-white/50 transition ${idx === activeSlide ? "bg-white shadow" : "bg-white/10"}`}
               />
             ))}
           </div>
@@ -240,8 +326,11 @@ const HomePage = () => {
       </section>
 
       {/* DOCTORS */}
-      <section className="relative isolate w-full px-4 py-10 sm:py-12">
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-blue-50 via-white to-slate-50" aria-hidden="true" />
+      <section className="relative isolate w-full px-4 py-16 sm:py-[4.5rem]">
+        <div
+          className="absolute inset-0 -z-10 bg-gradient-to-b from-[#e8f1ff] via-[#f0f6ff] to-white"
+          aria-hidden="true"
+        />
         <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-700 sm:text-sm">
@@ -259,182 +348,205 @@ const HomePage = () => {
             {t("common.nav.doctors")}
           </Link>
         </div>
-        <div className="mt-8">
-          {isMobileDoctors ? (
-            <div className="overflow-hidden rounded-3xl ring-1 ring-slate-100 shadow-md bg-white/90">
-              <div
-                className="flex transition-transform duration-700 ease-in-out"
-                style={{ transform: `translateX(-${activeDoctorSlide * 100}%)` }}
-              >
-                {doctors.map((doc) => (
-                  <div key={doc.name} className="min-w-full px-2 py-2">
-                    <div className="rounded-3xl bg-white p-5 shadow-md ring-1 ring-slate-100">
-                      <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
-                        <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-900">Featured</span>
-                        <span className="text-blue-500">24/7 care</span>
-                      </div>
-                      <div className="mt-3 h-32 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
-                        {placeholders.doctorImage}
-                      </div>
-                      <p className="mt-3 text-lg font-bold text-slate-900">{doc.name}</p>
-                      <p className="text-sm font-semibold text-blue-900">{doc.role}</p>
-                      <p className="mt-2 text-sm text-slate-700">{doc.note}</p>
-                      <div className="mt-4 grid gap-2">
-                        <button
-                          type="button"
-                          className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5"
-                          onClick={() => {
-                            setActiveDoctor(doc);
-                            setIsDoctorModalOpen(true);
-                          }}
-                        >
-                          {t("common.learnMore", { defaultValue: "View Profile" })}
-                        </button>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              <div className="flex justify-center gap-2 pb-3 pt-2">
-                {doctors.map((_, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    aria-label={`Go to doctor ${idx + 1}`}
-                    onClick={() => setActiveDoctorSlide(idx)}
-                    className={`h-2 rounded-full transition ${idx === activeDoctorSlide ? "w-6 bg-blue-800" : "w-2 bg-slate-300"}`}
-                  />
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="grid gap-4 sm:gap-5 md:grid-cols-3">
-              {doctors.map((doc, idx) => {
-                const meta = doctorMeta[idx];
-                return (
-                <div
-                  key={doc.name}
-                  className="relative overflow-hidden rounded-3xl bg-white/90 p-5 shadow-[0_10px_45px_-18px_rgba(15,23,42,0.35)] ring-1 ring-slate-200 backdrop-blur transition hover:-translate-y-1 hover:shadow-[0_20px_70px_-24px_rgba(15,23,42,0.4)]"
-                >
-                  <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-80" />
-                  <div className="relative">
-                  <div className="flex items-center justify-between text-xs font-semibold uppercase tracking-[0.18em] text-blue-700">
-                    <span className="rounded-full bg-blue-50 px-3 py-1 text-blue-900">Featured</span>
-                    <span className="text-blue-500">24/7 care</span>
-                  </div>
-                  <div className="mt-3 h-28 sm:h-32 md:h-36 rounded-2xl bg-slate-100 text-center text-sm text-slate-500">
-                    {placeholders.doctorImage}
-                  </div>
-                  <p className="mt-3 text-lg font-bold text-slate-900 sm:text-xl">{doc.name}</p>
-                  <p className="text-sm font-semibold text-blue-900 sm:text-base">{doc.role}</p>
-                  <p className="mt-2 text-sm text-slate-700 sm:text-base">{doc.note}</p>
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
-                    <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Rating {meta.rating}</span>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Response {meta.response}</span>
-                    <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Languages: {meta.languages.join(", ")}</span>
-                  </div>
-                  <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                    <button
-                      type="button"
-                      className="inline-flex items-center justify-center rounded-2xl bg-slate-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:-translate-y-0.5 sm:text-base"
-                      onClick={() => {
-                        setActiveDoctor(doc);
-                        setIsDoctorModalOpen(true);
-                      }}
-                    >
-                      {t("common.learnMore", { defaultValue: "View Profile" })}
-                    </button>
-                  </div>
+
+        <div className="mt-8 space-y-4">
+          <div
+            className="overflow-hidden rounded-3xl bg-gradient-to-br from-white/35 via-[#e9f3ff]/30 to-white/20 backdrop-blur"
+            onPointerDown={(e) => handleDoctorPointerDown(e.clientX)}
+            onPointerUp={(e) => handleDoctorPointerUp(e.clientX)}
+            onPointerLeave={() => endDoctorInteraction()}
+            onMouseEnter={beginDoctorInteraction}
+            onMouseLeave={endDoctorInteraction}
+            onTouchStart={(e) => handleDoctorPointerDown(e.touches?.[0]?.clientX ?? null)}
+            onTouchEnd={(e) => handleDoctorPointerUp(e.changedTouches?.[0]?.clientX ?? null)}
+          >
+            <div
+              className="flex transition-transform duration-700 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
+              style={{ transform: `translateX(-${activeDoctorIndex * 100}%)` }}
+              aria-live="polite"
+            >
+              {doctorPages.map((group, pageIdx) => (
+                <div key={`page-${pageIdx}`} className="min-w-full px-1">
+                  <div
+                    className="grid gap-3 sm:gap-4"
+                    style={{ gridTemplateColumns: `repeat(${Math.max(1, doctorPerView)}, minmax(0, 1fr))` }}
+                  >
+                    {group.map((doc) => (
+                      <Link
+                        key={doc.name}
+                        to={`/doctors#${slugify(doc.name)}`}
+                        className="block rounded-3xl focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200/60"
+                        onClick={beginDoctorInteraction}
+                      >
+                        <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-white/45 via-[#e8f2ff]/35 to-white/30 p-5 backdrop-blur transition hover:-translate-y-0.5">
+                          <div className="mt-4 flex justify-center">
+                            <div className="relative h-[15.1rem] w-[13.75rem] sm:h-[16.5rem] sm:w-[16.5rem] rounded-[999px] bg-gradient-to-br from-sky-50 via-white to-blue-50 shadow-[0_20px_50px_-22px_rgba(59,130,246,0.55)] ring-1 ring-[#3b82f6]/30">
+                              <div className="absolute -inset-3 rounded-[999px] bg-gradient-to-br from-sky-200/45 via-blue-100/28 to-white/6 blur-2xl opacity-65" aria-hidden="true" />
+                              <div className="absolute inset-[0.35rem] rounded-[999px] bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.92),rgba(255,255,255,0)),radial-gradient(circle_at_75%_65%,rgba(59,130,246,0.22),rgba(255,255,255,0))] shadow-inner animate-[float-soft_6s_ease-in-out_infinite] flex items-center justify-center text-center text-[13px] font-semibold text-slate-500 overflow-hidden">
+                                {placeholders.doctorImage}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="mt-4 text-center space-y-1">
+                            <p className="text-lg font-bold text-slate-900">{doc.name}</p>
+                            <p className="text-sm font-semibold text-blue-900">{doc.role}</p>
+                            <p className="text-sm text-slate-700">{doc.note}</p>
+                          </div>
+                        </div>
+                      </Link>
+                    ))}
                   </div>
                 </div>
-              );
-            })}
+              ))}
             </div>
-          )}
+          </div>
+          <div className="flex justify-center gap-2">
+            {doctorPages.map((_, idx) => (
+              <button
+                key={idx}
+                type="button"
+                aria-label={`Go to doctor ${idx + 1}`}
+                onClick={() => {
+                  beginDoctorInteraction();
+                  safelySetDoctorSlide(idx);
+                  endDoctorInteraction();
+                }}
+                className={`h-2 rounded-full transition ${idx === activeDoctorIndex ? "w-6 bg-blue-800" : "w-2 bg-slate-300"}`}
+              />
+            ))}
+          </div>
         </div>
       </section>
 
       {/* SIGNATURE SERVICES */}
-      <section className="w-full px-4 py-10 sm:py-12 bg-gradient-to-b from-white to-slate-50">
-        <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.35em] text-blue-700 sm:text-sm">
-              What we do best
-            </p>
-            <h2 className="text-2xl font-bold sm:text-3xl">{t("home.servicesTitle")}</h2>
-            <p className="mt-1 text-sm text-slate-600 sm:text-base">
-              Quick access to the departments patients rely on most.
-            </p>
+      <section className="relative isolate w-full overflow-hidden bg-gradient-to-b from-white via-slate-50 to-white px-4 py-[4.5rem] sm:py-[5.25rem]">
+        <div className="absolute -left-10 top-10 h-60 w-60 rounded-full bg-blue-100/60 blur-3xl animate-pan-soft" aria-hidden="true" />
+        <div className="absolute -right-16 -bottom-10 h-64 w-64 rounded-full bg-sky-200/55 blur-3xl animate-pan-soft" aria-hidden="true" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_28%,rgba(59,130,246,0.08),transparent_40%),radial-gradient(circle_at_72%_62%,rgba(14,165,233,0.08),transparent_38%)]" aria-hidden="true" />
+        <div className="relative mx-auto grid max-w-6xl items-stretch gap-8 lg:grid-cols-2">
+          <div className="scroll-reveal space-y-4">
+            <div className="inline-flex items-center gap-2 rounded-full bg-white/70 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.3em] text-blue-800 shadow-sm">
+              Signature Services
+              <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_0_6px_rgba(16,185,129,0.2)]" aria-hidden="true" />
+            </div>
+            <div>
+              <h2 className="text-[clamp(1.9rem,3vw,2.7rem)] font-black leading-tight text-slate-900">
+                {t("home.servicesTitle")}
+              </h2>
+              <p className="mt-1 text-sm text-slate-600 sm:text-base">
+                Quick access to the departments patients rely on most.
+              </p>
+            </div>
+            <div className="rounded-2xl bg-gradient-to-br from-white/70 via-slate-50/50 to-white/60 p-4 backdrop-blur">
+              <p className={`text-sm font-semibold text-slate-800 sm:text-base ${prefersReducedMotion ? "" : "typing-line"}`}>
+                {typedServiceLine}
+              </p>
+              <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
+                Imaging • Pharmacy • Recovery • ICU-ready
+              </p>
+            </div>
           </div>
-        </div>
-        <div className="mt-8 grid gap-5 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {services.map((service) => (
-            <Link
-              key={service.title}
-              to={`/services/${service.title.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/(^-|-$)/g, "")}`}
-              className="group relative overflow-hidden rounded-3xl bg-white/90 p-5 shadow-[0_12px_40px_-18px_rgba(15,23,42,0.25)] ring-1 ring-slate-200 backdrop-blur transition hover:-translate-y-1 hover:shadow-[0_18px_50px_-16px_rgba(15,23,42,0.28)] scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200"
-            >
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-80" />
-              <div className="relative flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-xl text-white shadow-inner transition duration-200 group-hover:scale-105">
-                    {service.icon}
-                  </span>
-                  <div>
-                    <p className="text-lg font-semibold text-slate-900 sm:text-xl">{service.title}</p>
-                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">24/7 access</p>
-                  </div>
-                </div>
+
+          <div className="scroll-reveal h-full">
+            <div className="relative flex h-full overflow-hidden rounded-3xl bg-gradient-to-br from-white/55 via-slate-50/35 to-white/55 backdrop-blur">
+              <div
+                className="flex w-full transition-transform duration-700 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
+                style={{ transform: `translateX(-${activeServiceIndex * 100}%)` }}
+              >
+                {services.map((service) => (
+                  <Link
+                    key={service.title}
+                    to={`/services/${slugify(service.title)}`}
+                    className="group min-w-full flex h-full flex-col gap-4 px-5 py-6 sm:px-7 sm:py-8 transition-all duration-500 hover:-translate-y-1 hover:bg-white/10 hover:shadow-[0_25px_60px_-28px_rgba(15,23,42,0.35)] active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200/60"
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-lg font-bold text-white shadow-inner transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105">
+                          {service.icon}
+                        </span>
+                        <div>
+                          <p className="text-lg font-semibold text-slate-900 sm:text-xl">{service.title}</p>
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">
+                            Flagship care
+                          </p>
+                        </div>
+                      </div>
+                      <span className="rounded-full bg-emerald-50 px-3 py-1 text-[11px] font-semibold text-emerald-700">
+                        Live now
+                      </span>
+                    </div>
+                    <p className="text-sm text-slate-700 sm:text-base">{service.desc}</p>
+                    <div className="flex-1 rounded-2xl bg-white/40 px-3 py-3 text-sm text-slate-500 transition duration-200">
+                      {placeholders.serviceImage}
+                    </div>
+                  </Link>
+                ))}
               </div>
-              <p className="relative mt-3 text-sm text-slate-700 sm:text-base">{service.desc}</p>
-              <div className="relative mt-4 rounded-2xl bg-slate-50 px-3 py-3 text-sm text-slate-500 ring-1 ring-slate-100 transition duration-200 group-hover:bg-slate-100">
-                {placeholders.serviceImage}
-              </div>
-            </Link>
-          ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* FEATURED DEPARTMENTS */}
-      <section className="bg-gradient-to-b from-white via-slate-50 to-white py-10 sm:py-12 text-slate-900">
+      <section className="relative isolate overflow-hidden bg-gradient-to-b from-white via-sky-50 to-white py-16 sm:py-[4.75rem] text-slate-900">
+        <div className="pointer-events-none absolute -left-24 top-8 h-64 w-64 rounded-full bg-sky-100/60 blur-3xl" />
+        <div className="pointer-events-none absolute right-[-6%] bottom-[-12%] h-72 w-72 rounded-full bg-slate-200/55 blur-3xl" />
         <div className="w-full px-3 sm:px-4">
-          <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-1">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500 sm:text-xs">
-                Departments
-              </p>
-              <h2 className="text-2xl font-black sm:text-3xl">{t("home.departmentsTitle")}</h2>
-              <p className="text-sm text-slate-600 sm:text-base">
-                Coordinated teams across diagnostics, surgery, rehab, and beyond.
+              <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-slate-500 sm:text-xs">Departments</p>
+              <h2 className="text-[clamp(1.9rem,3vw,2.8rem)] font-black leading-tight">{t("home.departmentsTitle")}</h2>
+              <p className="text-sm text-slate-600 sm:text-base max-w-3xl">
+                Coordinated teams with imaging, surgery, pharmacy, and rehab in one calm flow.
               </p>
             </div>
             <Link
               to="/departments"
-              className="inline-flex items-center justify-center rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 sm:text-base"
+              className="inline-flex items-center justify-center rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-900 shadow-lg transition hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 sm:text-base"
             >
               {t("common.nav.departments")}
             </Link>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
-            {featuredDepartments.map((dept) => (
+
+          <div className="mt-8 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+            {featuredDepartments.map((dept, idx) => (
               <Link
                 key={dept}
-                to={`/departments/${dept.toLowerCase().replace(/[^a-z0-9]+/gi, "-").replace(/(^-|-$)/g, "")}`}
-                className="group relative overflow-hidden rounded-2xl bg-white p-4 shadow-[0_10px_45px_-20px_rgba(15,23,42,0.2)] ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-[0_16px_60px_-22px_rgba(15,23,42,0.25)] hover:ring-slate-300 scroll-reveal focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-300/80"
+                to={`/departments/${slugify(dept)}`}
+                className="group relative min-h-[260px] overflow-hidden rounded-3xl bg-white/90 p-5 shadow-[0_24px_70px_-28px_rgba(15,23,42,0.28)] ring-1 ring-slate-200 transition hover:-translate-y-1 hover:shadow-[0_28px_80px_-30px_rgba(15,23,42,0.35)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-slate-300/70"
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 to-white opacity-90" />
-                <div className="relative flex items-center justify-between">
-                  <p className="text-base font-semibold text-slate-900 transition duration-200 group-hover:text-slate-700 sm:text-lg">
-                    {dept}
-                  </p>
-                  <span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Care</span>
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-50 opacity-90" aria-hidden="true" />
+                <div className="absolute inset-y-0 left-0 w-1.5 bg-gradient-to-b from-sky-500 via-blue-500 to-emerald-400" aria-hidden="true" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(59,130,246,0.12),transparent_45%),radial-gradient(circle_at_80%_70%,rgba(14,165,233,0.12),transparent_40%)]" aria-hidden="true" />
+
+                <div className="relative flex items-start justify-between gap-3">
+                  <div className="flex items-center gap-3">
+                    <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-sm font-bold text-white shadow-inner ring-1 ring-slate-200/50">
+                      {dept.slice(0, 2).toUpperCase()}
+                    </span>
+                    <div>
+                      <p className="text-lg font-semibold text-slate-900 sm:text-xl">{dept}</p>
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">Signature care</p>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-700 ring-1 ring-slate-200">
+                    #{idx + 1}
+                  </span>
                 </div>
-                <div className="relative mt-3 h-24 rounded-xl bg-slate-100 text-center text-sm text-slate-500 ring-1 ring-slate-200 transition duration-200 group-hover:bg-slate-200">
-                  {placeholders.departmentImage}
+
+                <div className="relative mt-4 grid gap-3 sm:grid-cols-[1.1fr_0.9fr]">
+                  <div className="rounded-2xl bg-white/80 p-3 text-sm text-slate-700 shadow-inner ring-1 ring-slate-200">
+                    Quiet lounges, staffed triage, on-floor imaging, and pharmacists on call.
+                  </div>
+                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-3 text-center text-xs font-semibold text-slate-600 shadow-inner h-28 sm:h-32 flex items-center justify-center">
+                    {placeholders.departmentImage}
+                  </div>
                 </div>
-                <div className="relative mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-600">
+
+                <div className="relative mt-4 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700">
                   <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Multidisciplinary</span>
                   <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">24/7 coverage</span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Escort ready</span>
                 </div>
               </Link>
             ))}
@@ -443,8 +555,8 @@ const HomePage = () => {
       </section>
 
       {/* TESTIMONIALS */}
-      <section className="relative isolate bg-gradient-to-r from-slate-900 via-blue-900 to-slate-900 py-6 sm:py-8 text-white">
-        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.08),transparent_35%),radial-gradient(circle_at_78%_32%,rgba(255,255,255,0.07),transparent_32%),radial-gradient(circle_at_42%_78%,rgba(59,130,246,0.16),transparent_36%)]" />
+      <section className="relative isolate bg-gradient-to-r from-sky-950 via-sky-900 to-slate-900 py-9 sm:py-12 text-white">
+        <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,0.08),transparent_35%),radial-gradient(circle_at_78%_32%,rgba(186,230,253,0.08),transparent_32%),radial-gradient(circle_at_42%_78%,rgba(59,130,246,0.18),transparent_36%)]" />
         <div className="mx-auto grid w-full max-w-6xl gap-4 px-4 sm:gap-5 sm:px-6 md:grid-cols-3">
           <div className="md:col-span-1 space-y-2">
             <p className="text-[11px] font-semibold uppercase tracking-[0.3em] text-sky-200">Voices from our patients</p>
@@ -500,6 +612,24 @@ const HomePage = () => {
                   }`}
                 />
               ))}
+              <div className="ml-3 flex items-center gap-2">
+                <button
+                  type="button"
+                  aria-label="Previous testimonials"
+                  onClick={() => moveTestimonialGroup(-1)}
+                  className="rounded-full border border-white/40 bg-white/10 px-3 py-1 text-xs font-semibold text-white shadow-sm transition hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                >
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next testimonials"
+                  onClick={() => moveTestimonialGroup(1)}
+                  className="rounded-full border border-white/40 bg-white px-3 py-1 text-xs font-semibold text-slate-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+                >
+                  Next
+                </button>
+              </div>
             </div>
           </div>
         </div>

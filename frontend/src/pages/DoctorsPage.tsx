@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import useScrollReveal from "../hooks/useScrollReveal";
 import { useTranslation } from "react-i18next";
 import DoctorProfileModal from "../components/DoctorProfileModal";
+import { useLocation } from "react-router-dom";
+import PageShell from "../components/PageShell";
 
 const DoctorsPage = () => {
   const { t } = useTranslation();
@@ -11,6 +13,12 @@ const DoctorsPage = () => {
     dept: string;
     note: string;
   }[];
+  const slugify = (value: string) =>
+    value
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/gi, "-")
+      .replace(/(^-|-$)/g, "");
+  const location = useLocation();
 
   const departments = [t("doctorsPage.allDepartments"), ...Array.from(new Set(doctors.map((d) => d.dept)))];
   const badgeDept = t("common.badgeDept");
@@ -115,49 +123,94 @@ const DoctorsPage = () => {
   );
   useScrollReveal();
 
+  useEffect(() => {
+    if (!location.hash) return;
+    const targetId = location.hash.replace("#", "");
+    const el = document.getElementById(targetId);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  }, [location.hash]);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-50 text-slate-900">
       <div className="mx-auto flex w-full max-w-7xl flex-1 flex-col space-y-8 px-4 py-10 sm:py-12">
         <div className="space-y-8">
-          <div className="relative overflow-hidden rounded-3xl bg-white/80 px-5 py-8 shadow-xl ring-1 ring-slate-200 backdrop-blur sm:px-6 sm:py-9">
-            <div className="pointer-events-none absolute -left-10 top-6 h-44 w-44 rounded-full bg-blue-100/60 blur-3xl" />
-            <div className="pointer-events-none absolute right-0 bottom-0 h-40 w-40 rounded-full bg-sky-100/60 blur-3xl" />
-            <div className="relative space-y-3">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-500">{t("doctorsPage.subtitle")}</p>
-              <h1 className="text-3xl font-black leading-tight text-slate-900 sm:text-4xl">{t("doctorsPage.title")}</h1>
-              <p className="text-base text-slate-700 sm:text-lg max-w-3xl">{t("doctorsPage.description")}</p>
-              <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
-                <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Human-first consultations</span>
-                <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Department-matched guidance</span>
+          <PageShell
+            title={t("doctorsPage.title")}
+            subtitle={t("doctorsPage.description")}
+            eyebrow={t("doctorsPage.subtitle")}
+            kicker="Doctors"
+            accent="#0ea5e9"
+          >
+            <div className="flex flex-wrap gap-2 text-xs font-semibold text-slate-700">
+              <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Human-first consultations</span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Department-matched guidance</span>
+              <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Same-week slots</span>
+            </div>
+
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+                <label className="text-sm font-semibold text-slate-700">{t("doctorsPage.filterDepartment")}</label>
+                <select className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base text-slate-900">
+                  {departments.map((dept) => (
+                    <option key={dept}>{dept}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+                <label className="text-sm font-semibold text-slate-700">{t("doctorsPage.searchPlaceholder")}</label>
+                <input
+                  type="search"
+                  placeholder={t("doctorsPage.searchPlaceholder")}
+                  className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base text-slate-900"
+                />
               </div>
             </div>
+          </PageShell>
+
+          {/* Mobile doctor cards */}
+          <div className="sm:hidden space-y-4">
+            {doctors.map((doc) => (
+              <div key={doc.name} className="rounded-3xl border border-slate-200 bg-white/95 p-4 shadow-[0_16px_40px_-26px_rgba(15,23,42,0.28)]">
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-lg font-semibold text-slate-900">{doc.name}</p>
+                    <p className="text-sm font-semibold text-slate-700">{doc.role}</p>
+                    <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">{doc.dept}</p>
+                  </div>
+                  <span className="rounded-full bg-slate-900 px-3 py-1 text-[11px] font-semibold text-white shadow-sm">Meet</span>
+                </div>
+                <p className="mt-2 text-sm text-slate-700">{doc.note}</p>
+                <div className="mt-3 flex flex-wrap gap-2 text-[11px] font-semibold text-slate-700">
+                  <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Same-week slots</span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Patient-first</span>
+                  <span className="rounded-full bg-slate-100 px-3 py-1 ring-1 ring-slate-200">Book direct</span>
+                </div>
+                <div className="mt-3 flex flex-col gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setActiveDoctor(doc);
+                      setIsModalOpen(true);
+                    }}
+                    className="inline-flex items-center justify-center rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:-translate-y-0.5 hover:shadow-lg"
+                  >
+                    View profile
+                  </button>
+                </div>
+              </div>
+            ))}
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-              <label className="text-sm font-semibold text-slate-700">{t("doctorsPage.filterDepartment")}</label>
-              <select className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base text-slate-900">
-                {departments.map((dept) => (
-                  <option key={dept}>{dept}</option>
-                ))}
-              </select>
-            </div>
-            <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-              <label className="text-sm font-semibold text-slate-700">{t("doctorsPage.searchPlaceholder")}</label>
-              <input
-                type="search"
-                placeholder={t("doctorsPage.searchPlaceholder")}
-                className="mt-2 w-full rounded-xl border border-slate-300 bg-white px-3 py-2 text-base text-slate-900"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-10">
+          {/* Desktop doctor feature sections */}
+          <div className="hidden space-y-10 sm:block">
             {doctors.map((doc, idx) => {
               const profile = doctorProfiles[idx];
               return (
                 <section
                   key={doc.name}
+                  id={slugify(doc.name)}
                   className="overflow-hidden rounded-[36px] shadow-2xl ring-1 ring-slate-200/60 scroll-reveal"
                   style={{
                     background: `linear-gradient(135deg, ${profile.palette.from}, ${profile.palette.to})`,

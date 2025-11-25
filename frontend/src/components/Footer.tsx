@@ -40,7 +40,7 @@ const Footer = () => {
             <p className="text-sm font-bold text-white">Quick Links</p>
             <div className="grid gap-2 text-xs font-semibold">
               <Link to="/about" className="hover:text-white">About Us</Link>
-              <Link to="/services/primary-care" className="hover:text-white">Services</Link>
+              <Link to="/services" className="hover:text-white">Services</Link>
               <Link to="/doctors" className="hover:text-white">Doctors</Link>
               <Link to="/appointments" className="hover:text-white">Appointments</Link>
               <Link to="/billing" className="hover:text-white">Billing</Link>
