@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { PointerEvent as ReactPointerEvent } from "react";
 import useScrollReveal from "../hooks/useScrollReveal";
 import heroImageOne from "../assets/Hero-title.webp";
 import heroImageTwo from "../assets/Hero-title1.webp";
@@ -63,8 +64,11 @@ const HomePage = () => {
   const [typingLineIndex, setTypingLineIndex] = useState(0);
   const [typedServiceLine, setTypedServiceLine] = useState("");
   const [isDoctorInteracting, setIsDoctorInteracting] = useState(false);
+  const [isServiceInteracting, setIsServiceInteracting] = useState(false);
   const doctorResumeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
   const doctorDragStartX = useRef<number | null>(null);
+  const serviceResumeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const serviceDragStartX = useRef<number | null>(null);
   const doctorPages = useMemo(() => {
     const size = Math.max(1, doctorPerView);
     const pages: typeof doctors[] = [];
@@ -147,11 +151,12 @@ const HomePage = () => {
 
   useEffect(() => {
     if (prefersReducedMotion || services.length <= 1) return;
+    if (isServiceInteracting) return;
     const id = setInterval(() => {
       setActiveServiceSlide((prev) => (prev + 1) % services.length);
     }, 4800);
     return () => clearInterval(id);
-  }, [prefersReducedMotion, services.length]);
+  }, [prefersReducedMotion, services.length, isServiceInteracting]);
 
   useEffect(() => {
     if (prefersReducedMotion || totalDoctorPages <= 1 || isDoctorInteracting) return;
@@ -203,6 +208,61 @@ const HomePage = () => {
     endDoctorInteraction();
   };
 
+  const handleBubblePointerMove = (e: ReactPointerEvent<HTMLDivElement>) => {
+    const target = e.currentTarget;
+    const rect = target.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const pctX = Math.min(100, Math.max(0, (x / rect.width) * 100));
+    const pctY = Math.min(100, Math.max(0, (y / rect.height) * 100));
+    const tiltX = ((pctX - 50) / 50) * 4;
+    const tiltY = ((pctY - 50) / 50) * -4;
+    target.style.setProperty("--glow-x", `${pctX}%`);
+    target.style.setProperty("--glow-y", `${pctY}%`);
+    target.style.setProperty("--tilt-x", `${tiltX}deg`);
+    target.style.setProperty("--tilt-y", `${tiltY}deg`);
+  };
+
+  const resetBubblePointer = (target: HTMLDivElement | null) => {
+    if (!target) return;
+    target.style.setProperty("--glow-x", "50%");
+    target.style.setProperty("--glow-y", "50%");
+    target.style.setProperty("--tilt-x", "0deg");
+    target.style.setProperty("--tilt-y", "0deg");
+  };
+
+  const safelySetServiceSlide = (next: number) => {
+    if (!services.length) return;
+    setActiveServiceSlide(((next % services.length) + services.length) % services.length);
+  };
+
+  const beginServiceInteraction = () => {
+    setIsServiceInteracting(true);
+    if (serviceResumeTimeout.current) clearTimeout(serviceResumeTimeout.current);
+  };
+
+  const endServiceInteraction = () => {
+    if (serviceResumeTimeout.current) clearTimeout(serviceResumeTimeout.current);
+    serviceResumeTimeout.current = setTimeout(() => setIsServiceInteracting(false), 1000);
+  };
+
+  const handleServicePointerDown = (clientX: number | null) => {
+    beginServiceInteraction();
+    serviceDragStartX.current = clientX;
+  };
+
+  const handleServicePointerUp = (clientX: number | null) => {
+    const startX = serviceDragStartX.current;
+    serviceDragStartX.current = null;
+    if (startX !== null && clientX !== null && services.length) {
+      const delta = clientX - startX;
+      if (Math.abs(delta) > 40) {
+        safelySetServiceSlide(activeServiceIndex + (delta > 0 ? -1 : 1));
+      }
+    }
+    endServiceInteraction();
+  };
+
   useEffect(() => {
     const updatePerView = () => {
       if (typeof window === "undefined") return;
@@ -219,6 +279,7 @@ const HomePage = () => {
   useEffect(
     () => () => {
       if (doctorResumeTimeout.current) clearTimeout(doctorResumeTimeout.current);
+      if (serviceResumeTimeout.current) clearTimeout(serviceResumeTimeout.current);
     },
     []
   );
@@ -380,9 +441,15 @@ const HomePage = () => {
                       >
                         <div className="overflow-hidden rounded-3xl bg-gradient-to-br from-white/45 via-[#e8f2ff]/35 to-white/30 p-5 backdrop-blur transition hover:-translate-y-0.5">
                           <div className="mt-4 flex justify-center">
-                            <div className="relative h-[15.1rem] w-[13.75rem] sm:h-[16.5rem] sm:w-[16.5rem] rounded-[999px] bg-gradient-to-br from-sky-50 via-white to-blue-50 shadow-[0_20px_50px_-22px_rgba(59,130,246,0.55)] ring-1 ring-[#3b82f6]/30">
+                            <div
+                              className="interactive-bubble relative h-[15.1rem] w-[13.75rem] rounded-[999px] bg-gradient-to-br from-sky-50 via-white to-blue-50 shadow-[0_20px_50px_-22px_rgba(59,130,246,0.55)] ring-1 ring-[#3b82f6]/30 sm:h-[16.5rem] sm:w-[16.5rem]"
+                              onPointerMove={handleBubblePointerMove}
+                              onPointerLeave={(e) => resetBubblePointer(e.currentTarget)}
+                            >
                               <div className="absolute -inset-3 rounded-[999px] bg-gradient-to-br from-sky-200/45 via-blue-100/28 to-white/6 blur-2xl opacity-65" aria-hidden="true" />
-                              <div className="absolute inset-[0.35rem] rounded-[999px] bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.92),rgba(255,255,255,0)),radial-gradient(circle_at_75%_65%,rgba(59,130,246,0.22),rgba(255,255,255,0))] shadow-inner animate-[float-soft_6s_ease-in-out_infinite] flex items-center justify-center text-center text-[13px] font-semibold text-slate-500 overflow-hidden">
+                              <span className="bubble-light" aria-hidden="true" />
+                              <span className="bubble-ripple" aria-hidden="true" />
+                              <div className="absolute inset-[0.35rem] flex items-center justify-center overflow-hidden rounded-[999px] bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,0.92),rgba(255,255,255,0)),radial-gradient(circle_at_75%_65%,rgba(59,130,246,0.22),rgba(255,255,255,0))] text-center text-[13px] font-semibold text-slate-500 shadow-inner animate-[float-soft_6s_ease-in-out_infinite]">
                                 {placeholders.doctorImage}
                               </div>
                             </div>
@@ -419,7 +486,7 @@ const HomePage = () => {
       </section>
 
       {/* SIGNATURE SERVICES */}
-      <section className="relative isolate w-full overflow-hidden bg-gradient-to-b from-white via-slate-50 to-white px-4 py-[4.5rem] sm:py-[5.25rem]">
+      <section className="relative isolate w-full overflow-hidden bg-gradient-to-b from-white via-slate-50 to-white px-4 pt-[4.5rem] pb-[6rem] sm:pt-[5.25rem] sm:pb-[6.5rem]">
         <div className="absolute -left-10 top-10 h-60 w-60 rounded-full bg-blue-100/60 blur-3xl animate-pan-soft" aria-hidden="true" />
         <div className="absolute -right-16 -bottom-10 h-64 w-64 rounded-full bg-sky-200/55 blur-3xl animate-pan-soft" aria-hidden="true" />
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_28%_28%,rgba(59,130,246,0.08),transparent_40%),radial-gradient(circle_at_72%_62%,rgba(14,165,233,0.08),transparent_38%)]" aria-hidden="true" />
@@ -442,13 +509,22 @@ const HomePage = () => {
                 {typedServiceLine}
               </p>
               <p className="mt-3 text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">
-                Imaging • Pharmacy • Recovery • ICU-ready
+                Imaging &gt; Pharmacy &gt; Recovery &gt; ICU-ready
               </p>
             </div>
           </div>
 
           <div className="scroll-reveal h-full">
-            <div className="relative flex h-full overflow-hidden rounded-3xl bg-gradient-to-br from-white/55 via-slate-50/35 to-white/55 backdrop-blur">
+            <div
+              className="relative flex h-full min-h-[248px] overflow-hidden rounded-3xl bg-gradient-to-br from-white/55 via-slate-50/35 to-white/55 backdrop-blur sm:min-h-[280px]"
+              onPointerDown={(e) => handleServicePointerDown(e.clientX)}
+              onPointerUp={(e) => handleServicePointerUp(e.clientX)}
+              onPointerLeave={() => endServiceInteraction()}
+              onMouseEnter={beginServiceInteraction}
+              onMouseLeave={endServiceInteraction}
+              onTouchStart={(e) => handleServicePointerDown(e.touches?.[0]?.clientX ?? null)}
+              onTouchEnd={(e) => handleServicePointerUp(e.changedTouches?.[0]?.clientX ?? null)}
+            >
               <div
                 className="flex w-full transition-transform duration-700 ease-[cubic-bezier(0.22,0.61,0.36,1)]"
                 style={{ transform: `translateX(-${activeServiceIndex * 100}%)` }}
@@ -457,11 +533,11 @@ const HomePage = () => {
                   <Link
                     key={service.title}
                     to={`/services/${slugify(service.title)}`}
-                    className="group min-w-full flex h-full flex-col gap-4 px-5 py-6 sm:px-7 sm:py-8 transition-all duration-500 hover:-translate-y-1 hover:bg-white/10 hover:shadow-[0_25px_60px_-28px_rgba(15,23,42,0.35)] active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200/60"
+                    className="group min-w-full flex h-full min-h-[232px] flex-col gap-3 px-5 py-6 transition-all duration-500 hover:-translate-y-1 hover:bg-white/10 hover:shadow-[0_25px_60px_-28px_rgba(15,23,42,0.35)] active:translate-y-0.5 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-blue-200/60 sm:min-h-[256px] sm:gap-4 sm:px-7 sm:py-8"
                   >
                     <div className="flex items-center justify-between gap-3">
                       <div className="flex items-center gap-3">
-                        <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-900 text-lg font-bold text-white shadow-inner transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105">
+                        <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-slate-900 text-base font-bold text-white shadow-inner transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:scale-105 sm:h-12 sm:w-12 sm:text-lg">
                           {service.icon}
                         </span>
                         <div>
@@ -476,11 +552,58 @@ const HomePage = () => {
                       </span>
                     </div>
                     <p className="text-sm text-slate-700 sm:text-base">{service.desc}</p>
-                    <div className="flex-1 rounded-2xl bg-white/40 px-3 py-3 text-sm text-slate-500 transition duration-200">
+                    <div className="flex-1 rounded-2xl bg-white/40 px-3 py-3 text-sm text-slate-500 transition duration-200 sm:text-base">
                       {placeholders.serviceImage}
                     </div>
                   </Link>
                 ))}
+              </div>
+            </div>
+            <div className="mt-3 flex w-full flex-col gap-2 sm:mt-4 sm:flex-row sm:flex-wrap sm:items-center sm:gap-y-2 sm:justify-between relative z-10">
+              <div className="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500 sm:hidden">
+                <span className="inline-flex h-2 w-2 rounded-full bg-emerald-500 shadow-[0_0_0_6px_rgba(16,185,129,0.12)]" aria-hidden="true" />
+                <span>Swipe services</span>
+              </div>
+              <div className="flex items-center gap-2">
+                {services.map((_, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    aria-label={`Go to service ${idx + 1}`}
+                    onClick={() => {
+                      beginServiceInteraction();
+                      safelySetServiceSlide(idx);
+                      endServiceInteraction();
+                    }}
+                    className={`h-2.5 w-2.5 rounded-full border border-slate-200 transition ${idx === activeServiceIndex ? "bg-slate-900" : "bg-white"}`}
+                  />
+                ))}
+              </div>
+              <div className="flex items-center gap-2 self-start sm:self-auto">
+                <button
+                  type="button"
+                  aria-label="Previous service"
+                  onClick={() => {
+                    beginServiceInteraction();
+                    safelySetServiceSlide(activeServiceIndex - 1);
+                    endServiceInteraction();
+                  }}
+                  className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm transition hover:-translate-y-0.5 hover:border-slate-300 hover:shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+                >
+                  Prev
+                </button>
+                <button
+                  type="button"
+                  aria-label="Next service"
+                  onClick={() => {
+                    beginServiceInteraction();
+                    safelySetServiceSlide(activeServiceIndex + 1);
+                    endServiceInteraction();
+                  }}
+                  className="rounded-full border border-slate-900 bg-slate-900 px-3 py-1 text-xs font-semibold text-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300"
+                >
+                  Next
+                </button>
               </div>
             </div>
           </div>
