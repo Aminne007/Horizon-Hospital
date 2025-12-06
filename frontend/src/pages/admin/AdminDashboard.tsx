@@ -104,10 +104,25 @@ const AdminDashboard = () => {
           { data: adminRow },
         ] = await Promise.all(queries);
 
-        const resultsArray = Array.isArray(recentResults) ? recentResults : [];
-        const doctorPerfArray = Array.isArray(doctorPerf) ? doctorPerf : [];
-        const signupsArray = Array.isArray(recentSignups) ? recentSignups : [];
-        const recordsArray = Array.isArray(recentRecords) ? recentRecords : [];
+        const resultsArray = (Array.isArray(recentResults) ? recentResults : []) as Array<{ id: string; created_at: string }>;
+        const doctorPerfArray: DoctorPerformance[] = Array.isArray(doctorPerf)
+          ? (doctorPerf as any[]).map((row) => ({
+              doctor_id: row.doctor_id ?? null,
+              doctor: Array.isArray(row.doctor) ? row.doctor[0] ?? null : row.doctor ?? null,
+              total: 1,
+            }))
+          : [];
+        const signupsArray = (Array.isArray(recentSignups) ? recentSignups : []) as Array<{
+          id: string;
+          full_name: string | null;
+          role?: string | null;
+          created_at?: string | null;
+        }>;
+        const recordsArray = (Array.isArray(recentRecords) ? recentRecords : []) as Array<{
+          id: string;
+          created_at: string | null;
+          diagnosis?: string | null;
+        }>;
 
         const anyError = totalError || clientsError || doctorsError || adminsError || resultsError || recentError;
         if (anyError) {
