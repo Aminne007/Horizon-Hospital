@@ -55,7 +55,14 @@ const DoctorResultsPage = () => {
         return;
       }
 
-      setResults((rows || []) as DoctorResultWithClient[]);
+      const normalized =
+        Array.isArray(rows) &&
+        rows.map((row) => ({
+          ...row,
+          client: Array.isArray(row.client) ? row.client[0] ?? null : row.client ?? null,
+        }));
+
+      setResults((normalized || []) as DoctorResultWithClient[]);
       setLoading(false);
     }
 

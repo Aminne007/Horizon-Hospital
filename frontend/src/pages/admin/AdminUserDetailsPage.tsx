@@ -1,4 +1,5 @@
-import { FormEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
+import type { FormEvent } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { supabase } from "../../supabaseClient";
 import type { ClientProfile, Profile } from "../../types/db";
@@ -240,7 +241,7 @@ const AdminUserDetailsPage = () => {
             <button
               type="button"
               onClick={handleDelete}
-              disabled={deleting || (currentAdminId && profile.id === currentAdminId)}
+              disabled={deleting || (!!currentAdminId && profile?.id === currentAdminId)}
               className="rounded-full border border-rose-200 bg-rose-50 px-4 py-2 text-xs font-semibold text-rose-800 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md disabled:opacity-60"
             >
               {deleting ? "Removing..." : "Delete user"}

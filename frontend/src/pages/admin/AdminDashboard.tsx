@@ -104,6 +104,11 @@ const AdminDashboard = () => {
           { data: adminRow },
         ] = await Promise.all(queries);
 
+        const resultsArray = Array.isArray(recentResults) ? recentResults : [];
+        const doctorPerfArray = Array.isArray(doctorPerf) ? doctorPerf : [];
+        const signupsArray = Array.isArray(recentSignups) ? recentSignups : [];
+        const recordsArray = Array.isArray(recentRecords) ? recentRecords : [];
+
         const anyError = totalError || clientsError || doctorsError || adminsError || resultsError || recentError;
         if (anyError) {
           setError("Unable to load analytics right now.");
@@ -138,7 +143,7 @@ const AdminDashboard = () => {
               labels.push(key);
               counts.set(key, 0);
             }
-            (recentResults || []).forEach((row: { created_at: string }) => {
+            resultsArray.forEach((row: { created_at: string }) => {
               const createdKey = new Date(row.created_at).toDateString();
               if (counts.has(createdKey)) counts.set(createdKey, (counts.get(createdKey) || 0) + 1);
             });
@@ -160,7 +165,7 @@ const AdminDashboard = () => {
               labels.push(key);
               counts.set(key, 0);
             }
-            (recentResults || []).forEach((row: { created_at: string }) => {
+            resultsArray.forEach((row: { created_at: string }) => {
               const created = new Date(row.created_at);
               const weeksDiff = Math.floor((created.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 7));
               const anchorLabel = labels[weeksDiff];
@@ -185,7 +190,7 @@ const AdminDashboard = () => {
               labels.push(key);
               counts.set(key, 0);
             }
-            (recentResults || []).forEach((row: { created_at: string }) => {
+            resultsArray.forEach((row: { created_at: string }) => {
               const created = new Date(row.created_at);
               const key = monthKey(created);
               if (counts.has(key)) counts.set(key, (counts.get(key) || 0) + 1);
@@ -216,7 +221,7 @@ const AdminDashboard = () => {
               labels.push(key);
               counts.set(key, 0);
             }
-            (recentResults || []).forEach((row: { created_at: string }) => {
+            resultsArray.forEach((row: { created_at: string }) => {
               const created = new Date(row.created_at);
               const key = monthKey(created);
               if (counts.has(key)) counts.set(key, (counts.get(key) || 0) + 1);
@@ -233,9 +238,9 @@ const AdminDashboard = () => {
             );
           }
           setAdminName((adminRow as { full_name: string | null } | null)?.full_name || "Admin");
-          if (!perfError && doctorPerf) {
+          if (!perfError && doctorPerfArray.length) {
             const agg = new Map<string, { doctor_id: string | null; doctor: { full_name: string | null } | null; total: number }>();
-            (doctorPerf as any[]).forEach((row) => {
+            doctorPerfArray.forEach((row: any) => {
               const key = row.doctor_id || "unknown";
               const existing = agg.get(key);
               if (existing) {
@@ -256,7 +261,7 @@ const AdminDashboard = () => {
             date: string | null;
             detail?: string;
           }> = [];
-          (recentSignups || []).forEach((row: any) =>
+          signupsArray.forEach((row: any) =>
             timelineItems.push({
               id: `signup-${row.id}`,
               kind: "signup",
@@ -265,7 +270,7 @@ const AdminDashboard = () => {
               detail: row.role || "USER",
             })
           );
-          (recentResults || []).forEach((row: any) =>
+          resultsArray.forEach((row: any) =>
             timelineItems.push({
               id: `result-${row.id}`,
               kind: "result",
@@ -274,7 +279,7 @@ const AdminDashboard = () => {
               detail: "",
             })
           );
-          (recentRecords || []).forEach((row: any) =>
+          recordsArray.forEach((row: any) =>
             timelineItems.push({
               id: `record-${row.id}`,
               kind: "record",
