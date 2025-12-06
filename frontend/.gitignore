@@ -11,6 +11,10 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
+.env.*
+.vercel
+.vscode/settings.json
 
 # Editor directories and files
 .vscode/*

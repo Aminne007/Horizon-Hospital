@@ -2,9 +2,12 @@ import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Link, NavLink, useLocation } from "react-router-dom";
 
+const DESKTOP_BREAKPOINT = 1450;
+
 const Header = () => {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
+  const [isDesktop, setIsDesktop] = useState(false);
   const location = useLocation();
 
   const emergencyNumber = t("common.hotlineNumber");
@@ -20,6 +23,7 @@ const Header = () => {
       { label: t("common.nav.departments"), path: "/departments" },
       { label: t("common.nav.doctors"), path: "/doctors" },
       { label: t("common.nav.appointments"), path: "/appointments" },
+      { label: t("common.nav.results"), path: "/result" },
       { label: t("common.nav.contact"), path: "/contact" },
       { label: t("common.nav.about"), path: "/about" },
     ],
@@ -35,16 +39,18 @@ const Header = () => {
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return;
 
-    const mq = window.matchMedia("(min-width: 1024px)");
-    const closeIfWide = (event?: MediaQueryListEvent) => {
-      if ((event && event.matches) || (!event && mq.matches)) {
+    const mq = window.matchMedia(`(min-width: ${DESKTOP_BREAKPOINT}px)`);
+    const handleChange = (event?: MediaQueryListEvent) => {
+      const matches = event ? event.matches : mq.matches;
+      setIsDesktop(matches);
+      if (matches) {
         setOpen(false);
       }
     };
 
-    closeIfWide();
-    mq.addEventListener("change", closeIfWide);
-    return () => mq.removeEventListener("change", closeIfWide);
+    handleChange();
+    mq.addEventListener("change", handleChange);
+    return () => mq.removeEventListener("change", handleChange);
   }, []);
 
   return (
@@ -97,68 +103,72 @@ const Header = () => {
           </a>
 
           {/* Desktop nav */}
-          <div className="hidden min-[1038px]:flex min-[1038px]:flex-wrap min-[1038px]:justify-end min-[1038px]:gap-2">
-            {navLinks.map((link) => (
-              <NavLink
-                key={link.path}
-                to={link.path}
-                className={({ isActive }) =>
-                  `rounded-full px-3 py-2 text-sm font-semibold transition duration-300 backdrop-blur border border-white/40 lg:text-base lg:px-4 ${
-                    isActive
-                      ? "bg-white/70 text-slate-900 shadow-lg ring-1 ring-white/50 scale-[1.04]"
-                      : "bg-white/10 text-slate-900 hover:bg-white/30 hover:shadow-md hover:-translate-y-0.5"
-                  }`
-                }
-                aria-current={
-                  location.pathname === link.path ? "page" : undefined
-                }
-              >
-                {link.label}
-              </NavLink>
-            ))}
-          </div>
+          {isDesktop && (
+            <div className="flex flex-wrap justify-end gap-2">
+              {navLinks.map((link) => (
+                <NavLink
+                  key={link.path}
+                  to={link.path}
+                  className={({ isActive }) =>
+                    `rounded-full px-3 py-2 text-sm font-semibold transition duration-300 backdrop-blur border border-white/40 lg:text-base lg:px-4 ${
+                      isActive
+                        ? "bg-white/70 text-slate-900 shadow-lg ring-1 ring-white/50 scale-[1.04]"
+                        : "bg-white/10 text-slate-900 hover:bg-white/30 hover:shadow-md hover:-translate-y-0.5"
+                    }`
+                  }
+                  aria-current={
+                    location.pathname === link.path ? "page" : undefined
+                  }
+                >
+                  {link.label}
+                </NavLink>
+              ))}
+            </div>
+          )}
 
           <div className="flex items-center gap-2" />
 
           {/* Mobile button */}
-          <button
-            type="button"
-            onClick={() => setOpen((prev) => !prev)}
-            className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/40 px-3 py-2 text-slate-900 shadow-sm backdrop-blur min-[1038px]:hidden"
-            aria-label="Menu"
-            aria-expanded={open}
-          >
-            <span className="sr-only">
-              {open ? "Close menu" : "Open menu"}
-            </span>
-            <svg
-              aria-hidden="true"
-              viewBox="0 0 24 24"
-              className="h-5 w-5"
+          {!isDesktop && (
+            <button
+              type="button"
+              onClick={() => setOpen((prev) => !prev)}
+              className="inline-flex items-center justify-center rounded-lg border border-white/50 bg-white/40 px-3 py-2 text-slate-900 shadow-sm backdrop-blur"
+              aria-label="Menu"
+              aria-expanded={open}
             >
-              {open ? (
-                <path
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  d="M6 6l12 12M6 18L18 6"
-                />
-              ) : (
-                <path
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  d="M4 7h16M4 12h16M4 17h16"
-                />
-              )}
-            </svg>
-          </button>
+              <span className="sr-only">
+                {open ? "Close menu" : "Open menu"}
+              </span>
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 24 24"
+                className="h-5 w-5"
+              >
+                {open ? (
+                  <path
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    d="M6 6l12 12M6 18L18 6"
+                  />
+                ) : (
+                  <path
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    d="M4 7h16M4 12h16M4 17h16"
+                  />
+                )}
+              </svg>
+            </button>
+          )}
         </div>
       </div>
 
       {/* Mobile menu */}
-      {open && (
-        <div className="absolute left-0 right-0 top-full z-50 border-t border-slate-200 bg-white/90 backdrop-blur-xl shadow-xl lg:hidden">
+      {open && !isDesktop && (
+        <div className="absolute left-0 right-0 top-full z-50 border-t border-slate-200 bg-white/90 backdrop-blur-xl shadow-xl">
           <nav className="flex w-full flex-col gap-2 px-4 py-4">
             {navLinks.map((link) => (
               <NavLink
