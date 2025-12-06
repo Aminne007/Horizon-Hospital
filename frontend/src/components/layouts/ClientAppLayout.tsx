@@ -139,7 +139,7 @@ const ClientAppLayout = () => {
               aria-label="Toggle navigation"
             >
               Menu
-              <span aria-hidden="true">{open ? "–" : "+"}</span>
+              <span aria-hidden="true">{open ? "-" : "+"}</span>
             </button>
             {open && (
               <nav className="mt-2 grid grid-cols-3 gap-2">
@@ -163,6 +163,13 @@ const ClientAppLayout = () => {
                     <span>{link.label}</span>
                   </NavLink>
                 ))}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow"
+                >
+                  {loggingOut ? "Signing out..." : "Logout"}
+                </button>
               </nav>
             )}
           </div>

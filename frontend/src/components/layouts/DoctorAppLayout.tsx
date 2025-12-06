@@ -184,6 +184,13 @@ const DoctorAppLayout = () => {
                     <span>{link.label}</span>
                   </NavLink>
                 ))}
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex items-center justify-center gap-2 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-sm font-semibold text-rose-700 shadow-sm transition hover:-translate-y-0.5 hover:shadow"
+                >
+                  {loggingOut ? "Signing out..." : "Logout"}
+                </button>
               </nav>
             )}
           </div>
